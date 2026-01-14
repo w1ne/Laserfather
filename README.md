@@ -23,6 +23,7 @@ Tests:
   - **Raster**: `.png`, `.jpg` (automatically rasterized with scanline generation).
 - **Scale**: All imports default to 100% scale (1:1 mm) and generic positioning.
 - **CAM Engine**: Assign operations (Vector Cut, Vector Engrave, Raster Engrave) with configurable speed/power/passes.
+- **Project Persistence**: Save and Load projects locally using IndexedDB (works offline).
 - **Machine Control**: Connect via Web Serial (Linux/Chrome) to stream G-code directly to GRBL.
 
 
