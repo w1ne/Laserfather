@@ -700,7 +700,7 @@ export function App() {
                 </div>
               </div>
             </div>
-            <div className="app__preview">
+            <div className="panel panel--preview">
               <div className="preview-container">
                 <svg className="preview-svg" viewBox={`0 0 ${machineProfile.bedMm.w} ${machineProfile.bedMm.h}`} preserveAspectRatio="xMidYMid meet">
                   <defs>
