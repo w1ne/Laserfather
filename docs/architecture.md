@@ -45,7 +45,8 @@ Current module layout
   - handler.ts (pure request router)
   - worker.ts (postMessage adapter)
 - apps/pwa/src/ui
-  - App.tsx (editor + import + export + machine control)
+  - App.tsx (Main layout, state container)
+  - panels/MachinePanel.tsx (Machine control logic: DRO, Jog, Stream)
   - workerClient.ts (UI-side RPC helper)
 - apps/pwa/src/io
   - registerServiceWorker.ts
@@ -57,24 +58,7 @@ Current module layout
 - apps/pwa/tests/golden
   - fixtures + expected G-code outputs
 
-Planned core layout (within `apps/pwa`)
-- apps/pwa/src/core/model
-  - document types, layer/object definitions
-- apps/pwa/src/core/geom
-  - transforms, polyline utils, bbox, path flattening
-- apps/pwa/src/core/cam
-  - vector planning, ordering, pass generation
-  - later: raster planning
-- apps/pwa/src/core/gcode
-  - dialect config, emitter, S-range mapping
-- apps/pwa/src/worker
-  - message router, calls into core
-- apps/pwa/src/io
-  - project storage (IndexedDB)
-  - import/export helpers
-  - web serial driver (GRBL)
-- apps/pwa/src/ui
-  - editor, panels, preview, machine tab
+
 
 Project persistence (local-first)
 - Store projects in IndexedDB:
@@ -84,10 +68,10 @@ Project persistence (local-first)
 - Export: generate .gcode file for download (MVP).
 - Project file packaging (zip) is optional later; do not block MVP on it.
 
-Machine control (GRBL-only, Milestone 2)
-- A "Machine" tab that is disabled if Web Serial is unavailable.
-- Streaming starts with ack-mode (line -> wait ok/error -> next).
-- Buffered streaming can be added later without changing the core.
+Machine control (GRBL)
+- A "Machine" tab handled by `MachinePanel`.
+- disabled if Web Serial is unavailable.
+- Streaming uses ack-mode (line -> wait ok/error -> next).
 
 Why this structure stays portable
 - All “hard stuff” (CAM/G-code) is isolated behind a message protocol.

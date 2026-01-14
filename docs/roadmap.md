@@ -80,15 +80,16 @@ Deliverables:
 Acceptance:
 - Create design with Image + Vector -> Save -> Refresh Page -> Open -> Design restored exactly.
 
-Milestone 6 — Advanced Machine Control
+Milestone 6 — Advanced Machine Control (Released)
 Goal: Full control over machine position and state.
 Deliverables:
 - Jog Controls (X/Y arrows) using GRBL `$J` jogging.
 - Homing (`$H`) and Unlock (`$X`) buttons.
 - Zeroing ("Set Zero" for Work Coordinate System).
 - Digital Readout (DRO) for Work and Machine coordinates.
-Acceptance:
-- Can jog machine smoothly.
-- Can home machine and set work zero.
-- Position updates in real-time.
+
+## Future Ideas
+- **Raster Improvements**: Brightness/Contrast adjustment, Dithering algorithms (Floyd-Steinberg).
+- **Material Library**: Presets for Speed/Power based on material.
+- **Parametric Shapes**: Circle, Star, Gear generators.
 

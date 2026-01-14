@@ -24,7 +24,12 @@ Tests:
 - **Scale**: All imports default to 100% scale (1:1 mm) and generic positioning.
 - **CAM Engine**: Assign operations (Vector Cut, Vector Engrave, Raster Engrave) with configurable speed/power/passes.
 - **Project Persistence**: Save and Load projects locally using IndexedDB (works offline).
-- **Machine Control**: Connect via Web Serial (Linux/Chrome) to stream G-code directly to GRBL.
+- **Machine Control**:
+  - **Connection**: Connect via Web Serial (Linux/Chrome) directly to GRBL.
+  - **DRO**: Real-time Digital Readout of Work and Machine coordinates.
+  - **Jogging**: Manual control with adjustable step size (0.1mm - 100mm) and speed.
+  - **Homing**: Support for Homing Cycle (`$H`) and Alarm Unlock (`$X`).
+  - **Zeroing**: Easy "Set Zero" for Work Coordinate System.
 
 
 ## getting started
