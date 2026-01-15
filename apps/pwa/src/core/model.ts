@@ -69,13 +69,22 @@ export type Document = {
 
 export type OperationOrder = "insideOut" | "shortestTravel" | "topDown";
 
+export type OperationMode = "line" | "fill";
+
 export type Operation = {
   id: string;
-  type: "vectorCut" | "vectorEngrave" | "rasterEngrave";
-  speedMmMin: number;
-  powerPct: number;
+  name: string; // New field for user friendliness
+  mode: OperationMode;
+  speed: number; // Simplified from speedMmMin
+  power: number; // Simplified from powerPct
   passes: number;
-  order: OperationOrder;
+
+  // Fill specific settings
+  lineInterval?: number;
+  angle?: number;
+
+  // Legacy support or advanced
+  order?: OperationOrder;
 };
 
 export type CamSettings = {

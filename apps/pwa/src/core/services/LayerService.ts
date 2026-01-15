@@ -17,34 +17,18 @@ export const LayerService = {
             operationId: newOpId
         };
 
-        // We also need to add the operation to camSettings
-        //Ideally this should be atomic, but for now we dispatch two actions or update the reducer to handle both.
-        // Let's modify the reducer/actions to be more atomic or dispatch multiple.
-        // For now, let's just use the primitives.
-
-        dispatch({ type: "ADD_LAYER", payload: newLayer });
-
-        // We need to add the operation too. Since we don't have ADD_OPERATION yet, 
-        // let's assume we update the whole camSettings or add a specific action.
-        // I'll add a helper action for this in the future, but for now lets strictly follow the Refactoring plan 
-        // and rely on what we have. 
-        // Actually, `SET_CAM_SETTINGS` is what we have. 
-
         const newOp: Operation = {
             id: newOpId,
-            type: "vectorCut",
-            speedMmMin: 1000,
-            powerPct: 50,
+            name: "Cut",
+            mode: "line",
+            speed: 1000,
+            power: 50,
             passes: 1,
             order: "insideOut"
         };
 
-        const newSettings = {
-            ...state.camSettings,
-            operations: [...state.camSettings.operations, newOp]
-        };
-
-        dispatch({ type: "SET_CAM_SETTINGS", payload: newSettings });
+        dispatch({ type: "ADD_LAYER", payload: newLayer });
+        dispatch({ type: "ADD_OPERATION", payload: newOp });
     },
 
     deleteLayer: (state: AppState, dispatch: React.Dispatch<Action>, layerId: string) => {

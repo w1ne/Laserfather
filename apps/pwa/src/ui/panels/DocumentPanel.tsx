@@ -61,7 +61,7 @@ export function DocumentPanel() {
                         }
                     }
 
-                    ObjectService.addObjects(dispatch, importedObjects);
+                    ObjectService.addObjects(dispatch, state, importedObjects);
 
                 } catch (error) {
                     console.error(error);
@@ -77,7 +77,7 @@ export function DocumentPanel() {
                         // Convert px to mm (assuming 96 DPI: 1 inch = 25.4mm)
                         const mmW = img.width * 0.264583;
                         const mmH = img.height * 0.264583;
-                        ObjectService.addImage(dispatch, src, mmW, mmH);
+                        ObjectService.addImage(dispatch, state, src, mmW, mmH);
                     };
                     img.src = src;
                 };
@@ -124,10 +124,26 @@ export function DocumentPanel() {
                                     textAlign: "left"
                                 }}
                             >
-                                <span style={{ fontWeight: isSelected ? "600" : "400" }}>{label}</span>
-                                <span className="list__meta" style={{ fontSize: "10px", color: "#888", background: "#f5f5f5", padding: "2px 6px", borderRadius: "10px" }}>
-                                    {layerName}
-                                </span>
+                                <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1 }}>
+                                    <span style={{ fontWeight: isSelected ? "600" : "400" }}>{label}</span>
+                                    <span className="list__meta" style={{ fontSize: "10px", color: "#888", background: "#f5f5f5", padding: "2px 6px", borderRadius: "10px" }}>
+                                        {layerName}
+                                    </span>
+                                </div>
+                                <div onClick={(e) => {
+                                    e.stopPropagation();
+                                    ObjectService.deleteObject(dispatch, obj.id);
+                                }} style={{
+                                    padding: "2px 6px",
+                                    fontSize: "10px",
+                                    color: "#d32f2f",
+                                    background: "#ffebee",
+                                    borderRadius: "4px",
+                                    border: "1px solid #ffcdd2",
+                                    cursor: "pointer"
+                                }}>
+                                    Del
+                                </div>
                             </button>
                         );
                     })}

@@ -111,9 +111,25 @@ Acceptance:
 - All UI components use the new Store.
 - No regression in features (Add Rect, Move Layer, Export still work).
 
+Milestone 9 — Advanced Modes (Line / Fill) (Released)
+Goal: Industry-standard "Line" and "Fill" logic.
+Deliverables:
+- **Modes**:
+    - **Line**: Vector following (Cut/Score).
+    - **Fill**: Raster scanning (Images & Vector Shapes).
+- **Smart Logic**:
+    - Auto-detect mode based on content (Image -> Fill, Vector -> Line).
+    - Vector Scanline Algorithm (to fill complex vector shapes).
+- **UI**:
+    - Layer Mode Selector (Line / Fill).
+    - Clear visual feedback for invalid combinations.
+Acceptance:
+- Can "Fill" a Vector Star.
+- Can "Line" a Vector Box.
+- Importing Image defaults to Fill.
+
 ## Future Ideas
 
-- **Raster Improvements**: Brightness/Contrast adjustment, Dithering algorithms (Floyd-Steinberg).
 - **Material Library**: Presets for Speed/Power based on material.
 - **Parametric Shapes**: Circle, Star, Gear generators.
 

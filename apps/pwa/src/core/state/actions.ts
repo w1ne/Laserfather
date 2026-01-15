@@ -1,4 +1,4 @@
-import { Document, CamSettings, Layer, Obj } from "../model";
+import { Document, CamSettings, Layer, Obj, Operation } from "../model";
 import { MachineStatus, MachineConnectionState } from "./types";
 
 export type Action =
@@ -14,6 +14,7 @@ export type Action =
     // CAM Actions
     | { type: "SET_CAM_SETTINGS"; payload: CamSettings }
     // We can add granular CAM actions later (UPDATE_OPERATION etc)
+    | { type: "ADD_OPERATION"; payload: Operation }
 
     // Machine Actions
     | { type: "SET_MACHINE_STATUS"; payload: MachineStatus }

@@ -48,9 +48,9 @@ export function emitGcode(
       continue;
     }
 
-    const speed = op.speedMmMin;
+    const speed = op.speed;
     const feed = formatFeed(speed);
-    const power = mapPower(op.powerPct, machine);
+    const power = mapPower(op.power, machine);
     const passes = Math.max(0, Math.floor(op.passes));
 
     for (let pass = 0; pass < passes; pass += 1) {

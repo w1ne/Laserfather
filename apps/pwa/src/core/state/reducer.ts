@@ -2,6 +2,7 @@ import { AppState } from "./types";
 import { Action } from "./actions";
 
 export function appReducer(state: AppState, action: Action): AppState {
+    console.log("Action:", action.type, action);
     switch (action.type) {
         case "SET_DOCUMENT":
             return { ...state, document: action.payload };
@@ -62,6 +63,15 @@ export function appReducer(state: AppState, action: Action): AppState {
 
         case "SET_CAM_SETTINGS":
             return { ...state, camSettings: action.payload };
+
+        case "ADD_OPERATION":
+            return {
+                ...state,
+                camSettings: {
+                    ...state.camSettings,
+                    operations: [...state.camSettings.operations, action.payload]
+                }
+            };
 
         case "SET_MACHINE_STATUS":
             return { ...state, machineStatus: action.payload };

@@ -56,37 +56,50 @@ export function planCam(document: Document, cam: CamSettings, images?: Map<strin
         continue;
       }
 
-      if (operation.type === "rasterEngrave") {
+      if (operation.mode === "fill") {
         if (obj.kind === "image") {
           const imageData = images?.get(obj.id);
           if (imageData) {
-            // BBox for image: transform.e/f + width/height (ignoring rotation for MVP)
+            // BBox for image
             const bbox = {
               x: obj.transform.e,
               y: obj.transform.f,
               w: obj.width,
-              h: obj.height // These are physical dimensions
+              h: obj.height
             };
-            // Avoid spread operator for large arrays (stack overflow)
+            // Note: We need to update generateRasterToolpath to accept new Operation type
+            // Casting for now or updating that signature is next step
+            // For MVP refactor step 1: stick to image raster
             const rasterPaths = generateRasterToolpath(imageData, cam, operation, bbox);
-            for (const path of rasterPaths) {
-              paths.push(path);
-            }
+            paths.push(...rasterPaths);
           } else {
             warnings.push(`Missing image data for object ${obj.id}`);
           }
+        } else {
+          // TODO: Implement Vector Scanline Fill here for Milestone 9b
+          // logical place: paths.push(...scanlineFill(obj));
+          warnings.push(`Vector Fill not implemented yet for ${obj.id}`);
         }
       } else {
-        // Vector operations
+        // Mode = "line" (Vector Cut/Score)
         if (obj.kind === "image") {
-          // Cannot cut/engrave vector on an image
+          // Images cannot be vector cut
           continue;
         }
         paths.push(...objToPolylines(obj));
       }
     }
 
-    const ordered = orderPaths(paths, operation);
+    // Only order if we have paths (and standard ordering applies)
+    // Raster usually has its own internal ordering (top-down), so we might skip this for raster
+    // but generateRasterToolpath returns lines, so generic ordering MIGHT mess it up if not careful.
+    // 'generateRasterToolpath' usually returns ordered lines.
+    // We should probably NOT re-order raster lines with 'shortestTravel' etc.
+    let ordered = paths;
+    if (operation.mode === "line") {
+      ordered = orderPaths(paths, operation);
+    }
+
     ops.push({ opId: operation.id, kind: "vector", paths: ordered });
   }
 

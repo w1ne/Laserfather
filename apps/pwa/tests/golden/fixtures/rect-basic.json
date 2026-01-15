@@ -16,8 +16,19 @@
         "kind": "shape",
         "id": "rect-1",
         "layerId": "layer-1",
-        "transform": { "a": 1, "b": 0, "c": 0, "d": 1, "e": 0, "f": 0 },
-        "shape": { "type": "rect", "width": 40, "height": 20 }
+        "transform": {
+          "a": 1,
+          "b": 0,
+          "c": 0,
+          "d": 1,
+          "e": 0,
+          "f": 0
+        },
+        "shape": {
+          "type": "rect",
+          "width": 40,
+          "height": 20
+        }
       }
     ]
   },
@@ -25,20 +36,30 @@
     "operations": [
       {
         "id": "op-1",
-        "type": "vectorCut",
-        "speedMmMin": 1200,
-        "powerPct": 50,
+        "name": "Cut",
+        "mode": "line",
+        "speed": 1200,
+        "power": 50,
         "passes": 1,
         "order": "insideOut"
       }
     ]
   },
   "machine": {
-    "bedMm": { "w": 300, "h": 200 },
+    "bedMm": {
+      "w": 300,
+      "h": 200
+    },
     "origin": "frontLeft",
-    "sRange": { "min": 0, "max": 1000 },
+    "sRange": {
+      "min": 0,
+      "max": 1000
+    },
     "laserMode": "M4",
-    "preamble": ["G21", "G90"]
+    "preamble": [
+      "G21",
+      "G90"
+    ]
   },
   "dialect": {
     "newline": "\n",

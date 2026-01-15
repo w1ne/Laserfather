@@ -16,22 +16,55 @@
         "kind": "shape",
         "id": "rect-a",
         "layerId": "layer-1",
-        "transform": { "a": 1, "b": 0, "c": 0, "d": 1, "e": 0, "f": 0 },
-        "shape": { "type": "rect", "width": 10, "height": 10 }
+        "transform": {
+          "a": 1,
+          "b": 0,
+          "c": 0,
+          "d": 1,
+          "e": 0,
+          "f": 0
+        },
+        "shape": {
+          "type": "rect",
+          "width": 10,
+          "height": 10
+        }
       },
       {
         "kind": "shape",
         "id": "rect-c",
         "layerId": "layer-1",
-        "transform": { "a": 1, "b": 0, "c": 0, "d": 1, "e": 200, "f": 0 },
-        "shape": { "type": "rect", "width": 10, "height": 10 }
+        "transform": {
+          "a": 1,
+          "b": 0,
+          "c": 0,
+          "d": 1,
+          "e": 200,
+          "f": 0
+        },
+        "shape": {
+          "type": "rect",
+          "width": 10,
+          "height": 10
+        }
       },
       {
         "kind": "shape",
         "id": "rect-b",
         "layerId": "layer-1",
-        "transform": { "a": 1, "b": 0, "c": 0, "d": 1, "e": 30, "f": 0 },
-        "shape": { "type": "rect", "width": 10, "height": 10 }
+        "transform": {
+          "a": 1,
+          "b": 0,
+          "c": 0,
+          "d": 1,
+          "e": 30,
+          "f": 0
+        },
+        "shape": {
+          "type": "rect",
+          "width": 10,
+          "height": 10
+        }
       }
     ]
   },
@@ -39,20 +72,30 @@
     "operations": [
       {
         "id": "op-1",
-        "type": "vectorCut",
-        "speedMmMin": 1500,
-        "powerPct": 20,
+        "name": "Cut",
+        "mode": "line",
+        "speed": 1500,
+        "power": 20,
         "passes": 1,
         "order": "shortestTravel"
       }
     ]
   },
   "machine": {
-    "bedMm": { "w": 300, "h": 200 },
+    "bedMm": {
+      "w": 300,
+      "h": 200
+    },
     "origin": "frontLeft",
-    "sRange": { "min": 0, "max": 1000 },
+    "sRange": {
+      "min": 0,
+      "max": 1000
+    },
     "laserMode": "M4",
-    "preamble": ["G21", "G90"]
+    "preamble": [
+      "G21",
+      "G90"
+    ]
   },
   "dialect": {
     "newline": "\n",

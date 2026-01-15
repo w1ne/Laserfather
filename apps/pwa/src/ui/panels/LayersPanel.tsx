@@ -65,20 +65,19 @@ export function LayersPanel({
                                     </button>
                                 </div>
 
-                                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.9fr 0.9fr 0.6fr", gap: "10px", alignItems: "end" }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(60px, 1fr))", gap: "10px", alignItems: "end" }}>
                                     <div style={{ display: "flex", flexDirection: "column" }}>
                                         <label style={{ fontSize: "11px", marginBottom: "4px", color: "#666", fontWeight: "500" }}>Mode</label>
                                         <select
-                                            value={op.type}
+                                            value={op.mode}
                                             style={{ fontSize: "13px", padding: "6px", borderRadius: "4px", border: "1px solid #ccc", background: "#fff", color: "#333" }}
                                             onChange={e => {
-                                                const newOps = updateOperation(camSettings.operations, op.id, o => ({ ...o, type: e.target.value as any }));
+                                                const newOps = updateOperation(camSettings.operations, op.id, o => ({ ...o, mode: e.target.value as any }));
                                                 dispatch({ type: "SET_CAM_SETTINGS", payload: { ...camSettings, operations: newOps } });
                                             }}
                                         >
-                                            <option value="vectorCut">Cut</option>
-                                            <option value="vectorEngrave">Engrave</option>
-                                            <option value="rasterEngrave">Raster</option>
+                                            <option value="line">Line</option>
+                                            <option value="fill">Fill</option>
                                         </select>
                                     </div>
 
@@ -87,9 +86,9 @@ export function LayersPanel({
                                         <input
                                             type="number"
                                             style={{ fontSize: "13px", padding: "6px", width: "100%", borderRadius: "4px", border: "1px solid #ccc", background: "#fff", color: "#333" }}
-                                            value={op.speedMmMin}
+                                            value={op.speed}
                                             onChange={e => {
-                                                const newOps = updateOperation(camSettings.operations, op.id, o => ({ ...o, speedMmMin: e.target.valueAsNumber }));
+                                                const newOps = updateOperation(camSettings.operations, op.id, o => ({ ...o, speed: e.target.valueAsNumber }));
                                                 dispatch({ type: "SET_CAM_SETTINGS", payload: { ...camSettings, operations: newOps } });
                                             }}
                                         />
@@ -99,9 +98,9 @@ export function LayersPanel({
                                         <input
                                             type="number"
                                             style={{ fontSize: "13px", padding: "6px", width: "100%", borderRadius: "4px", border: "1px solid #ccc", background: "#fff", color: "#333" }}
-                                            value={op.powerPct}
+                                            value={op.power}
                                             onChange={e => {
-                                                const newOps = updateOperation(camSettings.operations, op.id, o => ({ ...o, powerPct: e.target.valueAsNumber }));
+                                                const newOps = updateOperation(camSettings.operations, op.id, o => ({ ...o, power: e.target.valueAsNumber }));
                                                 dispatch({ type: "SET_CAM_SETTINGS", payload: { ...camSettings, operations: newOps } });
                                             }}
                                         />
@@ -118,6 +117,36 @@ export function LayersPanel({
                                             }}
                                         />
                                     </div>
+
+                                    {op.mode === "fill" && (
+                                        <>
+                                            <div style={{ display: "flex", flexDirection: "column" }}>
+                                                <label style={{ fontSize: "11px", marginBottom: "4px", color: "#666", fontWeight: "500" }}>Interval</label>
+                                                <input
+                                                    type="number"
+                                                    step="0.05"
+                                                    style={{ fontSize: "13px", padding: "6px", width: "100%", borderRadius: "4px", border: "1px solid #ccc", background: "#fff", color: "#333" }}
+                                                    value={op.lineInterval || 0.1}
+                                                    onChange={e => {
+                                                        const newOps = updateOperation(camSettings.operations, op.id, o => ({ ...o, lineInterval: e.target.valueAsNumber }));
+                                                        dispatch({ type: "SET_CAM_SETTINGS", payload: { ...camSettings, operations: newOps } });
+                                                    }}
+                                                />
+                                            </div>
+                                            <div style={{ display: "flex", flexDirection: "column" }}>
+                                                <label style={{ fontSize: "11px", marginBottom: "4px", color: "#666", fontWeight: "500" }}>Angle</label>
+                                                <input
+                                                    type="number"
+                                                    style={{ fontSize: "13px", padding: "6px", width: "100%", borderRadius: "4px", border: "1px solid #ccc", background: "#fff", color: "#333" }}
+                                                    value={op.angle || 0}
+                                                    onChange={e => {
+                                                        const newOps = updateOperation(camSettings.operations, op.id, o => ({ ...o, angle: e.target.valueAsNumber }));
+                                                        dispatch({ type: "SET_CAM_SETTINGS", payload: { ...camSettings, operations: newOps } });
+                                                    }}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         );

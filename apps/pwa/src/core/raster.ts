@@ -19,7 +19,7 @@ export function generateRasterToolpath(
     const pixelW = bbox.w / width;
     const pixelH = bbox.h / height;
 
-    // Threshold (fixed for now, could be in settings)
+    // Threshold (fixed for now, should come from settings)
     const threshold = 127;
 
     // Direction flip for bidirectional scanning
