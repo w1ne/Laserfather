@@ -88,7 +88,19 @@ Deliverables:
 - Zeroing ("Set Zero" for Work Coordinate System).
 - Digital Readout (DRO) for Work and Machine coordinates.
 
+Milestone 7 — UI Refactoring & UX Simplification (In Progress)
+Goal: Make the interface logical, simple, and scalable.
+Deliverables:
+- Split monolithic `App.tsx` into focused panels (`DocumentPanel`, `PropertiesPanel`, `LayersPanel`).
+- logical grouping: "Add/Import" belongs to Document; "Layer Assignment" belongs to Properties.
+- Clean separation of concern: Design State vs Machine State.
+Acceptance:
+- User can intuitively find "Import".
+- User can easily move objects between layers.
+- Codebase is modular (no 1000+ line App.tsx).
+
 ## Future Ideas
+
 - **Raster Improvements**: Brightness/Contrast adjustment, Dithering algorithms (Floyd-Steinberg).
 - **Material Library**: Presets for Speed/Power based on material.
 - **Parametric Shapes**: Circle, Star, Gear generators.

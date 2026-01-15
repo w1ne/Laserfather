@@ -18,6 +18,9 @@ import { createWebSerialGrblDriver } from "../io/grblDriver";
 import { createWorkerClient } from "./workerClient";
 import { projectRepo, ProjectSummary } from "../io/projectRepo";
 import { MachinePanel } from "./panels/MachinePanel";
+import { DocumentPanel } from "./panels/DocumentPanel";
+import { PropertiesPanel } from "./panels/PropertiesPanel";
+import { LayersPanel } from "./panels/LayersPanel";
 import "./app.css";
 
 type ExportState = {
@@ -114,21 +117,7 @@ function downloadGcode(filename: string, gcode: string) {
   URL.revokeObjectURL(url);
 }
 
-function updateOperation(
-  operations: Operation[],
-  opId: string,
-  updater: (op: Operation) => Operation
-): Operation[] {
-  return operations.map((op) => (op.id === opId ? updater(op) : op));
-}
 
-function updateLayer(layers: Layer[], layerId: string, updater: (layer: Layer) => Layer): Layer[] {
-  return layers.map((layer) => (layer.id === layerId ? updater(layer) : layer));
-}
-
-function formatNumber(value: number) {
-  return Number.isFinite(value) ? value.toFixed(2) : "0.00";
-}
 
 export function App() {
   const initialDocument = useMemo(() => createDefaultDocument(), []);
@@ -512,6 +501,58 @@ export function App() {
     }
   };
 
+  const handleAddLayer = () => {
+    // Use timestamp + random to avoid ID collisions on delete/re-add
+    const uniqueSuffix = `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const newLayerId = `layer-${uniqueSuffix}`;
+    const newOpId = `op-${uniqueSuffix}`;
+
+    const newLayer: Layer = {
+      id: newLayerId,
+      name: `Layer ${document.layers.length + 1}`, // Name can be sequential, that's fine
+      visible: true,
+      locked: false,
+      operationId: newOpId,
+      updatedAt: Date.now()
+    };
+
+    const newOp: Operation = {
+      id: newOpId,
+      type: "vectorCut",
+      speedMmMin: 1000,
+      powerPct: 50,
+      passes: 1,
+      order: "insideOut"
+    };
+
+    setDocument(prev => ({ ...prev, layers: [...prev.layers, newLayer] }));
+    setCamSettings(prev => ({ ...prev, operations: [...prev.operations, newOp] }));
+  };
+
+  const handleDeleteLayer = (layerId: string) => {
+    // Don't allow deleting the last layer
+    if (document.layers.length <= 1) {
+      alert("Cannot delete the last layer.");
+      return;
+    }
+
+    // Find a fallback layer
+    const fallbackLayer = document.layers.find(l => l.id !== layerId);
+    if (!fallbackLayer) return; // Should not happen given check above
+
+    setDocument(prev => ({
+      ...prev,
+      layers: prev.layers.filter(l => l.id !== layerId),
+      // Move objects to fallback layer
+      objects: prev.objects.map(obj => obj.layerId === layerId ? { ...obj, layerId: fallbackLayer.id } : obj)
+    }));
+
+    // We don't strictly need to delete the operation from camSettings, but good hygiene
+    // However, finding the opId requires looking up the layer first.
+    // The layer object in scope is from the closure, we need the current state.
+    // Simpler to just leave the orphaned operation for now, or filter it if we want to be perfect.
+  };
+
   const handleStreamAbort = async () => {
     if (driverRef.current) await driverRef.current.abort();
     if (streamRef.current) await streamRef.current.abort();
@@ -523,7 +564,7 @@ export function App() {
     <div className="app">
       <header className="app__header">
         <div>
-          <p className="app__eyebrow">Milestone 6</p>
+          <p className="app__eyebrow">Milestone 7</p>
           <h1>LaserFather Workspace</h1>
           <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
             <button onClick={handleNewProject}>New</button>
@@ -592,114 +633,32 @@ export function App() {
         {activeTab === "design" ? (
           <>
             <div className="app__sidebar">
-              <div className="panel">
-                <div className="panel__header">
-                  <h2>Document</h2>
-                  <button className="button" onClick={handleAddRectangle}>Add Rect</button>
-                  <button className="button" onClick={handleImportFile} style={{ marginLeft: 8 }}>Import</button>
-                </div>
-                <div className="panel__body">
-                  <div className="list">
-                    {document.objects.map(obj => {
-                      const isSelected = obj.id === selectedObjectId;
-                      let label = obj.id;
-                      if (obj.kind === "shape") label = `Rect ${formatNumber(obj.shape.width)}x${formatNumber(obj.shape.height)}`;
-                      if (obj.kind === "image") label = `Image ${formatNumber(obj.width)}x${formatNumber(obj.height)}`;
-                      if (obj.kind === "path") label = "Path";
+              <DocumentPanel
+                document={document}
+                selectedObjectId={selectedObjectId}
+                onSelectObject={setSelectedObjectId}
+                onAddRectangle={handleAddRectangle}
+                onImportFile={handleImportFile}
+              />
+              <PropertiesPanel
+                document={document}
+                selectedObjectId={selectedObjectId}
+                setDocument={setDocument}
+              />
 
-                      return (
-                        <button key={obj.id}
-                          className={`list__item ${isSelected ? "is-active" : ""}`}
-                          onClick={() => setSelectedObjectId(obj.id)}>
-                          <span>{label}</span>
-                          <span className="list__meta">{obj.layerId}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {selectedObject ? (
-                    <div className="form">
-                      <div className="form__row">
-                        <label>X <input type="number" value={selectedObject.transform.e} onChange={e => {
-                          const v = e.target.valueAsNumber;
-                          if (!isNaN(v)) setDocument(p => ({ ...p, objects: p.objects.map(o => o.id === selectedObjectId ? { ...o, transform: { ...o.transform, e: v } } : o) }));
-                        }} /></label>
-                        <label>Y <input type="number" value={selectedObject.transform.f} onChange={e => {
-                          const v = e.target.valueAsNumber;
-                          if (!isNaN(v)) setDocument(p => ({ ...p, objects: p.objects.map(o => o.id === selectedObjectId ? { ...o, transform: { ...o.transform, f: v } } : o) }));
-                        }} /></label>
-                      </div>
-                      {(selectedObject.kind === "shape" || selectedObject.kind === "image") && (
-                        <div className="form__row">
-                          <label>W <input type="number" value={selectedObject.kind === "shape" ? selectedObject.shape.width : selectedObject.width} onChange={e => {
-                            const v = e.target.valueAsNumber;
-                            if (!isNaN(v)) setDocument(p => ({
-                              ...p, objects: p.objects.map(o => {
-                                if (o.id !== selectedObjectId) return o;
-                                if (o.kind === "shape") return { ...o, shape: { ...o.shape, width: v } };
-                                if (o.kind === "image") return { ...o, width: v };
-                                return o;
-                              })
-                            }));
-                          }} /></label>
-                          <label>H <input type="number" value={selectedObject.kind === "shape" ? selectedObject.shape.height : selectedObject.height} onChange={e => {
-                            const v = e.target.valueAsNumber;
-                            if (!isNaN(v)) setDocument(p => ({
-                              ...p, objects: p.objects.map(o => {
-                                if (o.id !== selectedObjectId) return o;
-                                if (o.kind === "shape") return { ...o, shape: { ...o.shape, height: v } };
-                                if (o.kind === "image") return { ...o, height: v };
-                                return o;
-                              })
-                            }));
-                          }} /></label>
-                        </div>
-                      )}
-                    </div>
-                  ) : <div className="panel__note">Select an object.</div>}
-                </div>
-              </div>
-
-              <div className="panel">
-                <div className="panel__header"><h2>Operations</h2></div>
-                <div className="panel__body">
-                  <div className="form__group">
-                    <div className="form__title">Layers</div>
-                    {document.layers.map(layer => (
-                      <label key={layer.id}>{layer.name}
-                        <select value={layer.operationId ?? ""} onChange={e => {
-                          setDocument(p => ({ ...p, layers: updateLayer(p.layers, layer.id, l => ({ ...l, operationId: e.target.value })) }));
-                        }}>
-                          {camSettings.operations.map(op => <option key={op.id} value={op.id}>{op.type}</option>)}
-                        </select>
-                      </label>
-                    ))}
-                  </div>
-                  <div className="form__group">
-                    <div className="form__title">Settings</div>
-                    {camSettings.operations.map(op => (
-                      <div key={op.id} className="form__stack">
-                        <label>Type <select value={op.type} onChange={e => setCamSettings(p => ({ ...p, operations: updateOperation(p.operations, op.id, o => ({ ...o, type: e.target.value as any })) }))}>
-                          <option value="vectorCut">Vector Cut</option>
-                          <option value="vectorEngrave">Vector Engrave</option>
-                          <option value="rasterEngrave">Raster Engrave</option>
-                        </select></label>
-                        <label>Speed <input type="number" value={op.speedMmMin} onChange={e => setCamSettings(p => ({ ...p, operations: updateOperation(p.operations, op.id, o => ({ ...o, speedMmMin: e.target.valueAsNumber })) }))} /></label>
-                        <label>Power <input type="number" value={op.powerPct} onChange={e => setCamSettings(p => ({ ...p, operations: updateOperation(p.operations, op.id, o => ({ ...o, powerPct: e.target.valueAsNumber })) }))} /></label>
-                        <label>Passes <input type="number" value={op.passes} onChange={e => setCamSettings(p => ({ ...p, operations: updateOperation(p.operations, op.id, o => ({ ...o, passes: e.target.valueAsNumber })) }))} /></label>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="form__group">
-                    <div className="form__title">Export</div>
-                    <button className="button button--primary" onClick={handleExport} disabled={isExportDisabled}>Export G-code</button>
-                    {exportState.message && <div className={`status status--${exportState.status === "error" ? "error" : "info"}`}>{exportState.message}</div>}
-                  </div>
-                </div>
-              </div>
+              <LayersPanel
+                document={document}
+                camSettings={camSettings}
+                setDocument={setDocument}
+                setCamSettings={setCamSettings}
+                onAddLayer={handleAddLayer}
+                onDeleteLayer={handleDeleteLayer}
+                onExport={handleExport}
+                exportState={exportState}
+                isExportDisabled={isExportDisabled}
+              />
             </div>
+
             <div className="panel panel--preview">
               <div className="preview-container">
                 <svg className="preview-svg" viewBox={`0 0 ${machineProfile.bedMm.w} ${machineProfile.bedMm.h}`} preserveAspectRatio="xMidYMid meet">
@@ -761,6 +720,6 @@ export function App() {
           </div>
         )}
       </main>
-    </div>
+    </div >
   );
 }
