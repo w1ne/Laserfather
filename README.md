@@ -17,52 +17,70 @@ Tests:
 - apps/pwa/tests/golden: golden G-code fixtures
 
 ## Features
-- **Design Workspace**: Create rectangles, or import external files.
-- **Import File**: Unified import for:
-  - **Vector**: `.svg` (automatically converted to paths for cutting/engraving).
-  - **Raster**: `.png`, `.jpg` (automatically rasterized with scanline generation).
-- **Scale**: All imports default to 100% scale (1:1 mm) and generic positioning.
-- **CAM Engine**: Assign operations (Vector Cut, Vector Engrave, Raster Engrave) with configurable speed/power/passes.
-- **Project Persistence**: Save and Load projects locally using IndexedDB (works offline).
-- **Machine Control**:
-  - **Connection**: Connect via Web Serial (Linux/Chrome) directly to GRBL.
-  - **DRO**: Real-time Digital Readout of Work and Machine coordinates.
-  - **Jogging**: Manual control with adjustable step size (0.1mm - 100mm) and speed.
-  - **Homing**: Support for Homing Cycle (`$H`) and Alarm Unlock (`$X`).
-  - **Zeroing**: Easy "Set Zero" for Work Coordinate System.
 
+### 🎨 Design Workspace
+- **Vector & Raster Support**: Import `.svg`, `.png`, and `.jpg` files.
+- **Smart conversion**: Automatically converts images to scanlines and shapes to paths.
+- **Layer Management**: Reorder, hide, and lock layers for complex compositions.
+- **Premium UI**: localized, light-themed interface with 3D-style controls.
 
-## getting started
+### ⚙️ CAM Engine
+- **Configurable Operations**: Assign Cut, Vector Engrave, or Raster Engrave.
+- **Material Profiles**: Save speed/power settings for different materials (Wood, Acrylic, Leather).
+- **Offline Capable**: All processing happens locally in the browser.
 
-**Prerequisites:** Node.js >=18 (v12 is too old for current dependencies).
+### 🤖 Machine Control
+- **Direct Connection**: Web Serial API support for connecting directly to GRBL firmware (v1.1+).
+- **Unified Interface**: Clean, "Design-tab" styled machine panel.
+- **Reliability**: Optimized streaming/buffering for smooth motion without "jerks".
+- **Simulation**: Built-in simulator for testing workflows without physical hardware.
 
-### installation
+---
+
+## Getting Started
+
+### Prerequisites
+- Node.js >= 18 (Required for Vite/Esbuild)
+- A modern browser (Chrome/Edge recommended for Web Serial support)
+
+### Installation
 ```bash
 npm install
 ```
 
-### run locally
+### Development
+Run the local dev server:
 ```bash
 npm run dev
 ```
 
-### run tests
+### Testing
+Run unit and integration tests:
 ```bash
 npm run test
 ```
 
-### Linux setup
+> **Note on Testing**: The test suite automatically uses a **Simulated Driver** to verify G-code generation and streaming logic without needing a real machine connected.
 
-If you cannot connect to the device (Status: "Failed to open serial port"):
+---
+
+## Linux Setup & Troubleshooting
+
+### Serial Connection Issues
+If you see **"Failed to open serial port"** or cannot connect:
 
 1.  **Permissions**: Ensure your user is in the `dialout` group:
     ```bash
     sudo usermod -a -G dialout $USER
-    # You MUST log out and log back in for this to take effect!
+    # You MUST log out and log back in (or restart) for this to take effect!
     ```
 
-2.  **Interference**: If it still fails, stop ModemManager (it grabs serial ports):
+2.  **ModemManager Interference**: Ubuntu/Debian often tries to grab serial devices. Disable it:
     ```bash
     sudo systemctl stop ModemManager
     sudo systemctl disable ModemManager
     ```
+
+3.  **Baud Rate**: The default is `115200`. If your machine differs, you may need to adjust the `INITIAL_MACHINE_PROFILE` in `types.ts` or select a different profile.
+
+4.  **Simulation Mode**: If the machine moves in the UI but not in real life, you might be in Simulation Mode. This is enabled via code for testing. Check `driverSingleton.ts` and ensure `useSimulation` is false for production use.
