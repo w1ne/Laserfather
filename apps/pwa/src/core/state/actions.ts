@@ -1,5 +1,5 @@
-import { Document, CamSettings, Layer, Obj, Operation } from "../model";
-import { MachineStatus, MachineConnectionState } from "./types";
+import { Document, CamSettings, Layer, Obj, Operation, MachineProfile } from "../model";
+import { MachineStatus, MachineConnectionState, MachineStreamState } from "./types";
 
 export type Action =
     // Document Actions
@@ -19,6 +19,14 @@ export type Action =
     // Machine Actions
     | { type: "SET_MACHINE_STATUS"; payload: MachineStatus }
     | { type: "SET_CONNECTION_STATUS"; payload: MachineConnectionState }
+    | { type: "SET_STREAM_STATUS"; payload: MachineStreamState }
+
+    // Machine Profile Actions
+    | { type: "SET_MACHINE_PROFILES"; payload: MachineProfile[] }
+    | { type: "ADD_MACHINE_PROFILE"; payload: MachineProfile }
+    | { type: "UPDATE_MACHINE_PROFILE"; payload: { id: string; changes: Partial<MachineProfile> } }
+    | { type: "DELETE_MACHINE_PROFILE"; payload: string }
+    | { type: "SELECT_MACHINE_PROFILE"; payload: string } // id
 
     // UI Actions
     | { type: "SET_ACTIVE_TAB"; payload: "design" | "machine" };

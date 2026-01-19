@@ -79,6 +79,47 @@ export function appReducer(state: AppState, action: Action): AppState {
         case "SET_CONNECTION_STATUS":
             return { ...state, machineConnection: action.payload };
 
+        case "SET_STREAM_STATUS":
+            return { ...state, machineStream: action.payload };
+
+        // Machine Profile Reducers
+        case "SET_MACHINE_PROFILES":
+            return { ...state, machineProfiles: action.payload };
+
+        case "ADD_MACHINE_PROFILE":
+            return {
+                ...state,
+                machineProfiles: [...state.machineProfiles, action.payload]
+            };
+
+        case "UPDATE_MACHINE_PROFILE": {
+            const updatedProfiles = state.machineProfiles.map(p =>
+                p.id === action.payload.id ? { ...p, ...action.payload.changes } : p
+            );
+            // If we updated the active one, sync it
+            const active = updatedProfiles.find(p => p.id === state.activeMachineProfileId) || state.machineProfile;
+            return {
+                ...state,
+                machineProfiles: updatedProfiles,
+                machineProfile: active
+            };
+        }
+
+        case "DELETE_MACHINE_PROFILE": {
+            const remains = state.machineProfiles.filter(p => p.id !== action.payload);
+            return { ...state, machineProfiles: remains };
+        }
+
+        case "SELECT_MACHINE_PROFILE": {
+            const found = state.machineProfiles.find(p => p.id === action.payload);
+            if (!found) return state;
+            return {
+                ...state,
+                activeMachineProfileId: found.id,
+                machineProfile: found
+            };
+        }
+
         case "SET_ACTIVE_TAB":
             return { ...state, ui: { ...state.ui, activeTab: action.payload } };
 

@@ -128,6 +128,22 @@ Acceptance:
 - Can "Line" a Vector Box.
 - Importing Image defaults to Fill.
 
+Milestone 10 — Machine Configuration Manager (Planned)
+Goal: Manage multiple machine profiles (size, speed, firmware settings).
+Deliverables:
+- **Persistence**: Store machine profiles locally (IndexedDB/LocalStorage).
+- **UI**:
+    - Machine selection dropdown in Machine Panel.
+    - "Manage Machines" dialog (Add/Edit/Delete).
+    - Fields: Bed Size (W/H), Origin, Max Spindle, Baud Rate.
+- **Integration**:
+    - G-code generation uses the selected machine's bed size and S-value range.
+Acceptance:
+- Can create "My Diode Laser" (300x300, S1000).
+- Can create "My CO2 Laser" (600x400, S100).
+- Switching profile updates the "Preview" boundary box.
+
+
 ## Future Ideas
 
 - **Material Library**: Presets for Speed/Power based on material.

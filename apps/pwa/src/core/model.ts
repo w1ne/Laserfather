@@ -95,10 +95,13 @@ export type CamSettings = {
 };
 
 export type MachineProfile = {
+  id: string;   // Unique ID
+  name: string; // User-friendly name
   bedMm: { w: number; h: number };
   origin: "frontLeft" | "frontRight" | "rearLeft" | "rearRight";
   sRange: { min: number; max: number };
   laserMode: "M3" | "M4";
+  baudRate: number; // Device baud rate
   preamble?: string[];
   postamble?: string[];
 };

@@ -3,6 +3,7 @@ import { useStore } from "../core/state/store";
 import { getDriver } from "../io/driverSingleton";
 import { createWorkerClient } from "./workerClient";
 import { projectRepo, ProjectSummary } from "../io/projectRepo";
+import { machineRepo } from "../io/machineRepo";
 import { MachinePanel } from "./panels/MachinePanel";
 import { DocumentPanel } from "./panels/DocumentPanel";
 import { PropertiesPanel } from "./panels/PropertiesPanel";
@@ -43,6 +44,34 @@ export function App() {
       clientRef.current = null;
     };
   }, []);
+
+  // --- Machine Profile Init ---
+  useEffect(() => {
+    const initMachines = async () => {
+      try {
+        await machineRepo.initDefaults();
+        const profiles = await machineRepo.list();
+        if (profiles.length > 0) {
+          dispatch({ type: "SET_MACHINE_PROFILES", payload: profiles });
+          // If the current state has a placeholder profile, switch to the first real one
+          // Or if we implementing "Last Used" persistence, load it here.
+          // For now, default to first one if we are on the placeholder.
+          // Actually, INITIAL_STATE has "default-machine".
+          // We should select it from the loaded list to ensure we have the latest properties.
+          const defaultId = "default-machine";
+          const found = profiles.find(p => p.id === defaultId);
+          if (found) {
+            dispatch({ type: "SELECT_MACHINE_PROFILE", payload: found.id });
+          } else {
+            dispatch({ type: "SELECT_MACHINE_PROFILE", payload: profiles[0].id });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load machine profiles", e);
+      }
+    };
+    initMachines();
+  }, [dispatch]);
 
   // --- Machine Status Polling ---
   useEffect(() => {
@@ -328,17 +357,14 @@ export function App() {
             </div>
           </>
         ) : (
-          <div className="panel machine-control-wrapper" style={{ maxWidth: "800px", margin: "0 auto", width: "100%" }}>
-            <h2>Machine Control</h2>
-            <MachinePanel
-              onConnect={handleConnect}
-              onDisconnect={handleDisconnect}
-              onStreamStart={handleStreamStart}
-              onStreamPause={handleStreamPause}
-              onStreamResume={handleStreamResume}
-              onStreamAbort={handleStreamAbort}
-            />
-          </div>
+          <MachinePanel
+            onConnect={handleConnect}
+            onDisconnect={handleDisconnect}
+            onStreamStart={handleStreamStart}
+            onStreamPause={handleStreamPause}
+            onStreamResume={handleStreamResume}
+            onStreamAbort={handleStreamAbort}
+          />
         )}
       </main>
     </div>
