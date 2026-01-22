@@ -41,6 +41,9 @@ Definition of Done (any PR)
 - Worker protocol changes updated in docs/interfaces.md.
 - No new TODO without an issue link.
 
+Support the Project
+- If you find this useful, consider [donating](https://github.com/sponsors/w1ne) to support development.
+
 Repo structure (single app, minimal)
 - /apps/pwa
   - /src/core       (pure TS core, no browser APIs)

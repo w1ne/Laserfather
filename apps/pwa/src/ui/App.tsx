@@ -13,6 +13,7 @@ import { Transform } from "../core/model";
 import { IDENTITY_TRANSFORM } from "../core/geom";
 import { ObjectService } from "../core/services/ObjectService";
 import { PreviewPanel } from "./panels/PreviewPanel";
+import { DonateButton } from "./DonateButton";
 import "./app.css";
 
 export function App() {
@@ -276,6 +277,7 @@ export function App() {
             <button onClick={handleNewProject}>New</button>
             <button onClick={handleListProjects}>Open</button>
             <button onClick={handleSaveProject}>Save</button>
+            <DonateButton />
           </div>
         </div>
         <div className={`app__worker ${workerStatus.ready ? "is-ready" : ""}`}>

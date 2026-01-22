@@ -1,5 +1,8 @@
 # LaserFather PWA
 
+[![Support](https://img.shields.io/badge/Support-Donate-ea4aaa?style=flat-square)](https://github.com/sponsors/w1ne)
+
+
 Short guide to the repo layout:
 - apps/pwa: PWA app (UI, worker, core, and browser integrations)
 - docs: roadmap, architecture, and interface specs
@@ -19,21 +22,21 @@ Tests:
 ## Features
 
 ### Design Workspace
-- **Vector & Raster Support**: Import `.svg`, `.png`, and `.jpg` files.
-- **Smart conversion**: Automatically converts images to scanlines and shapes to paths.
-- **Layer Management**: Reorder, hide, and lock layers for complex compositions.
+- **Vector an Raster Support**, import `.svg`, `.png`, and `.jpg` files.
+- **Smart conversion**, automatically converts images to scanlines and shapes to paths.
+- **Layer Management**, reorder, hide, and lock layers for complex compositions.
 
 ### CAM Engine
-- **Configurable Operations**: Assign Cut, Vector Engrave, or Raster Engrave.
-- **Material Profiles**: Save speed/power settings for different materials (Wood, Acrylic, Leather).
-- **Offline Capable**: All processing happens locally in the browser.
+- **Configurable Operations**, assign Cut, Vector Engrave, or Raster Engrave.
+- **Material Profiles**, save speed/power settings for different materials (Wood, Acrylic, Leather).
+- **Offline Capable**, all processing happens locally in the browser.
 
 ### Machine Control
-- **Direct Connection**: Web Serial API support for connecting directly to GRBL firmware (v1.1+).
-- **Split View Interface**: Optimized layout with controls on the left and a large, live preview on the right.
-- **Live Preview**: Real-time visualization of the machine bed and laser head position.
-- **Reliability**: Optimized streaming/buffering for smooth motion without "jerks".
-- **Simulation**: Built-in simulator for testing workflows without physical hardware.
+- **Direct Connection**, Web Serial API support for connecting directly to GRBL firmware (v1.1+).
+- **Split View Interface**, Optimized layout with controls on the left and a large, live preview on the right.
+- **Live Preview**, Real-time visualization of the machine bed and laser head position.
+- **Reliability**, Optimized streaming/buffering for smooth motion without "jerks".
+- **Simulation**, Built-in simulator for testing workflows without physical hardware.
 
 ---
 
