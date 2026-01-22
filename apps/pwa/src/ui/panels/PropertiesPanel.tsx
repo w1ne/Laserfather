@@ -19,7 +19,7 @@ export function PropertiesPanel() {
         );
     }
 
-    const f = (n?: number) => n !== undefined ? Number(n.toFixed(3)) : "";
+    const f = (n?: number) => n !== undefined ? Number(n.toFixed(2)) : "";
 
     return (
         <div className="panel">
