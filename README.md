@@ -18,18 +18,17 @@ Tests:
 
 ## Features
 
-### 🎨 Design Workspace
+### Design Workspace
 - **Vector & Raster Support**: Import `.svg`, `.png`, and `.jpg` files.
 - **Smart conversion**: Automatically converts images to scanlines and shapes to paths.
 - **Layer Management**: Reorder, hide, and lock layers for complex compositions.
-- **Premium UI**: localized, light-themed interface with 3D-style controls.
 
-### ⚙️ CAM Engine
+### CAM Engine
 - **Configurable Operations**: Assign Cut, Vector Engrave, or Raster Engrave.
 - **Material Profiles**: Save speed/power settings for different materials (Wood, Acrylic, Leather).
 - **Offline Capable**: All processing happens locally in the browser.
 
-### 🤖 Machine Control
+### Machine Control
 - **Direct Connection**: Web Serial API support for connecting directly to GRBL firmware (v1.1+).
 - **Split View Interface**: Optimized layout with controls on the left and a large, live preview on the right.
 - **Live Preview**: Real-time visualization of the machine bed and laser head position.
