@@ -19,17 +19,19 @@ export function PropertiesPanel() {
         );
     }
 
+    const f = (n?: number) => n !== undefined ? Number(n.toFixed(3)) : "";
+
     return (
         <div className="panel">
             <div className="panel__header"><h2>Properties</h2></div>
             <div className="panel__body">
                 <div className="form">
                     <div className="form__row">
-                        <label className="form-label">X <input type="number" className="form-input" value={selectedObject.transform.e} onChange={e => {
+                        <label className="form-label">X <input type="number" className="form-input" value={f(selectedObject.transform.e)} onChange={e => {
                             const v = e.target.valueAsNumber;
                             if (!isNaN(v)) ObjectService.updateObject(dispatch, selectedObject.id, { transform: { ...selectedObject.transform, e: v } });
                         }} /></label>
-                        <label className="form-label">Y <input type="number" className="form-input" value={selectedObject.transform.f} onChange={e => {
+                        <label className="form-label">Y <input type="number" className="form-input" value={f(selectedObject.transform.f)} onChange={e => {
                             const v = e.target.valueAsNumber;
                             if (!isNaN(v)) ObjectService.updateObject(dispatch, selectedObject.id, { transform: { ...selectedObject.transform, f: v } });
                         }} /></label>
@@ -47,7 +49,7 @@ export function PropertiesPanel() {
 
                     {(selectedObject.kind === "shape" || selectedObject.kind === "image") && (
                         <div className="form__row">
-                            <label className="form-label">W <input type="number" className="form-input" value={selectedObject.kind === "shape" ? selectedObject.shape?.width : (selectedObject as ImageObj).width} onChange={e => {
+                            <label className="form-label">W <input type="number" className="form-input" value={f(selectedObject.kind === "shape" ? selectedObject.shape?.width : (selectedObject as ImageObj).width)} onChange={e => {
                                 const v = e.target.valueAsNumber;
                                 if (!isNaN(v)) {
                                     if (selectedObject.kind === "shape") {
@@ -57,7 +59,7 @@ export function PropertiesPanel() {
                                     }
                                 }
                             }} /></label>
-                            <label className="form-label">H <input type="number" className="form-input" value={selectedObject.kind === "shape" ? selectedObject.shape?.height : (selectedObject as ImageObj).height} onChange={e => {
+                            <label className="form-label">H <input type="number" className="form-input" value={f(selectedObject.kind === "shape" ? selectedObject.shape?.height : (selectedObject as ImageObj).height)} onChange={e => {
                                 const v = e.target.valueAsNumber;
                                 if (!isNaN(v)) {
                                     if (selectedObject.kind === "shape") {
