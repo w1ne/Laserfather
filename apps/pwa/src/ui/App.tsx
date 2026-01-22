@@ -16,6 +16,7 @@ import { IDENTITY_TRANSFORM } from "../core/geom";
 import { ObjectService } from "../core/services/ObjectService";
 import { PreviewPanel } from "./panels/PreviewPanel";
 import { DonateButton } from "./DonateButton";
+import { AboutDialog } from "./AboutDialog";
 import "./app.css";
 
 export function App() {
@@ -32,6 +33,7 @@ export function App() {
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [savedProjects, setSavedProjects] = useState<ProjectSummary[]>([]);
   const [isProjectLoading, setIsProjectLoading] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   // --- Worker Init ---
   useEffect(() => {
@@ -293,6 +295,7 @@ export function App() {
             <button onClick={handleNewProject}>New</button>
             <button onClick={handleListProjects}>Open</button>
             <button onClick={handleSaveProject}>Save</button>
+            <button onClick={() => setShowAbout(true)}>About</button>
             <DonateButton />
           </div>
         </div>
@@ -364,6 +367,7 @@ export function App() {
           </>
         )}
       </main>
+      <AboutDialog isOpen={showAbout} onClose={() => setShowAbout(false)} />
     </div>
   );
 }
