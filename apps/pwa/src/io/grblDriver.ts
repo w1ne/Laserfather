@@ -200,7 +200,18 @@ export function createWebSerialGrblDriver(options: WebSerialOptions = {}): GrblD
         throw new Error("Web Serial is not supported in this browser.");
       }
 
-      port = await serialImpl.requestPort();
+      // Android/WebUSB often requires filters to show devices.
+      // We list common USB-Serial chips used in lasers (CH340, CP210x, FTDI, CDC, Arduino).
+      const filters = (isAndroid || serialImpl === polyfillSerial) ? [
+        { usbVendorId: 0x1a86 }, // CH340
+        { usbVendorId: 0x10c4 }, // CP210x (Silicon Labs)
+        { usbVendorId: 0x0403 }, // FTDI
+        { usbVendorId: 0x2341 }, // Arduino (Atmel)
+        { usbVendorId: 0x2a03 }, // Arduino (Newer)
+        { usbVendorId: 0x0483 }, // STM32 (some controllers)
+      ] : undefined;
+
+      port = await serialImpl.requestPort({ filters });
       await port.open({ baudRate });
       reader = port.readable?.getReader() ?? null;
       writer = port.writable?.getWriter() ?? null;
