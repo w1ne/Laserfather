@@ -22,17 +22,17 @@ export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
                     </p>
                     <hr style={{ margin: "16px 0", border: "0", borderTop: "1px solid #eee" }} />
                     <p>
-                        Created by <a href="https://shylenko.com" target="_blank" rel="noopener noreferrer" style={{ color: "#2563eb", fontWeight: "600" }}>Andrii Shylenko</a>.
+                        Created by <a href="#" onClick={(e) => { e.preventDefault(); window.open("https://shylenko.com", "_blank"); }} style={{ color: "#2563eb", fontWeight: "600" }}>Andrii Shylenko</a>.
                     </p>
                     <p style={{ marginTop: "12px" }}>
                         <strong>Source Code:</strong><br />
-                        <a href="https://github.com/w1ne/Laserfather" target="_blank" rel="noopener noreferrer" style={{ color: "#2563eb" }}>
+                        <a href="#" onClick={(e) => { e.preventDefault(); window.open("https://github.com/w1ne/Laserfather", "_blank"); }} style={{ color: "#2563eb" }}>
                             github.com/w1ne/Laserfather
                         </a>
                     </p>
                     <p style={{ marginTop: "12px" }}>
                         <strong>Documentation:</strong><br />
-                        <a href="https://github.com/w1ne/Laserfather/tree/master/docs" target="_blank" rel="noopener noreferrer" style={{ color: "#2563eb" }}>
+                        <a href="#" onClick={(e) => { e.preventDefault(); window.open("https://github.com/w1ne/Laserfather/tree/master/docs", "_blank"); }} style={{ color: "#2563eb" }}>
                             Documentation on GitHub
                         </a>
                     </p>
