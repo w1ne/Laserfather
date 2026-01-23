@@ -1,43 +1,44 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to LaserFather.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [1.0.0] - 2026-01-23
+## 1.0.0 - 2026-01-23
 
 ### Added
-- **PWA Support**: Fully offline-capable Progressive Web App with installation support.
-- **Machine Selection**: Support for GRBL 1.1+ based laser cutters (Diode/CO2).
-- **Design Workspace**:
-    - Import SVG vectors and Raster images (PNG/JPG).
-    - Basic primitives (Rectangle).
-    - Layer management (ordering, visibility).
-    - Multi-select and transform (Move, Scale).
-- **CAM Engine**:
-    - Local G-code generation in Web Worker.
-    - Configurable operations (Vector Cut, Raster Engrave).
-    - Material Library for saving feed/speed presets.
-    - Smart "Generate" & "Download" workflow.
-- **Machine Control**:
-    - Direct connection via Web Serial API.
-    - Jog controls, Homing ($H), and Unlock ($X).
-    - Real-time position (DRO) and job status streaming.
-- **UI**:
-    - Properties panel with high-precision inputs (2 decimal places).
-    - About dialog with attribution and source links.
-    - "Buy Me A Coffee" integration.
-- **Documentation**:
-    - Comprehensive README with setup guide.
-    - Architecture and Roadmap docs.
-- **License**: CC BY-NC-SA 4.0.
+We added a lot in this first release!
+
+**PWA Support**
+The app works offline and you can install it on your device.
+
+**Machine Selection**
+Supports GRBL 1.1+ based laser cutters. This includes most Diode and CO2 lasers.
+
+**Design Workspace**
+You can import SVG vectors and Raster images like PNG or JPG. We added basic primitives like rectangles. You can manage layers and move or scale items.
+
+**CAM Engine**
+G-code generation happens locally in your browser so it is fast and private. You can configure cuts, vector engraves, or raster engraves. Save your favorite settings to the Material Library.
+
+**Machine Control**
+Connect directly to your laser using USB. We use the Web Serial API for this. You have full Jog controls plus Homing and Unlock. The position updates in real-time.
+
+**Android Support**
+We added a polyfill so you can connect from Android phones using an OTG cable.
+
+**UI**
+The Properties panel now rounds numbers nicely. We added an About dialog with links to the source code. You can also buy me a coffee if you like!
+
+**Documentation**
+New README with a setup guide. We also documented the architecture and roadmap.
+
+**License**
+Released under CC BY-NC-SA 4.0.
 
 ### Fixed
-- Fixed `crypto.randomUUID` error in non-secure contexts (HTTP).
-- Fixed excessive precision in Properties panel inputs (rounded to 2 decimals).
-- Fixed build configuration for relative paths (`./`) in Vite.
+We fixed a crash on non-secure HTTP sites regarding `crypto.randomUUID`.
+The Properties panel no longer shows messy numbers with too many decimal places.
+The build config was fixed to work with relative paths.
 
 ### Changed
-- Refactored G-code generation workflow to separate generation from streaming/downloading.
-- Updated project structure to use Yarn workspaces (if applicable, or just structure cleanups).
+G-code generation is now separate from streaming. This makes the workflow smoother.
+We updated the project structure for better organization.

@@ -2,84 +2,52 @@
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Support-Buy%20Me%20A%20Coffee-FFDD00?style=flat-square&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/3qutj2ucoq)
 
-
-Short guide to the repo layout:
-- apps/pwa: PWA app (UI, worker, core, and browser integrations)
-- docs: roadmap, architecture, and interface specs
-- package.json: root scripts that proxy into apps/pwa
-
-Key subfolders in apps/pwa/src:
-- core: pure TS CAM + G-code engine (no browser APIs)
-- worker: Web Worker entry and message router
-- ui: React UI
-- io: browser integrations (IndexedDB, Web Serial, service worker)
-- shared: shared types and helpers across UI/worker
-
-Tests:
-- apps/pwa/src/**/*.test.ts: unit tests
-- apps/pwa/tests/golden: golden G-code fixtures
+LaserFather is a tool for your laser cutter. It runs in your browser. You can design, plan, and cut without installing anything.
 
 ## Features
 
-### Design Workspace
-- **Vector an Raster Support**, import `.svg`, `.png`, and `.jpg` files.
-- **Smart conversion**, automatically converts images to scanlines and shapes to paths.
-- **Layer Management**, reorder, hide, and lock layers for complex compositions.
+**Design Workspace**
+We support SVGs and images like PNG or JPG. The app converts images to scanlines automatically. You can organize your work with layers.
 
-### CAM Engine
-- **Configurable Operations**, assign Cut, Vector Engrave, or Raster Engrave.
-- **Material Profiles**, save speed/power settings for different materials (Wood, Acrylic, Leather).
-- **Offline Capable**, all processing happens locally in the browser.
+**CAM Engine**
+You can configure Cuts or Engraves. Save your settings for different materials like Wood or Leather. Everything happens on your computer locally.
 
-### Machine Control
-- **Direct Connection**, Web Serial API support for connecting directly to GRBL firmware (v1.1+).
-- **Split View Interface**, Optimized layout with controls on the left and a large, live preview on the right.
-- **Live Preview**, Real-time visualization of the machine bed and laser head position.
-- **Reliability**, Optimized streaming/buffering for smooth motion without "jerks".
-- **Simulation**, Built-in simulator for testing workflows without physical hardware.
-
----
+**Machine Control**
+Connect directly to your GRBL machine via USB. We have a split view so you can see the preview and controls at the same time. The motion is smooth and reliable.
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js >= 18 (Required for Vite/Esbuild)
-- A modern browser (Chrome/Edge recommended for Web Serial support)
+You need Node.js 18 or newer. We recommend Chrome or Edge for the best experience with Web Serial.
 
 ### Installation
+Run this command to install dependencies.
 ```bash
 npm install
 ```
 
 ### Development
-Run the local dev server:
+Start the local server.
 ```bash
 npm run dev
 ```
 
 ### Testing
-Run unit and integration tests:
+Run the test suite.
 ```bash
 npm run test
 ```
 
-> **Note on Testing**: The test suite automatically uses a **Simulated Driver** to verify G-code generation and streaming logic without needing a real machine connected.
+## Linux Setup
 
----
-
-## Linux Setup & Troubleshooting
-
-### Serial Connection Issues
-If you see **"Failed to open serial port"** or cannot connect:
-
-1.  **Permissions**: Ensure your user is in the `dialout` group:
+If you cannot connect to the serial port, check your permissions.
+1.  Add your user to the `dialout` group.
     ```bash
     sudo usermod -a -G dialout $USER
-    # You MUST log out and log back in (or restart) for this to take effect!
     ```
+    Log out and back in for this to work.
 
-2.  **ModemManager Interference**: Ubuntu/Debian often tries to grab serial devices. Disable it:
+2.  Ubuntu often lets `ModemManager` grab looking serial devices. You might need to stop it.
     ```bash
     sudo systemctl stop ModemManager
-    sudo systemctl disable ModemManager
     ```

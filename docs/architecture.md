@@ -1,78 +1,48 @@
-# File: docs/architecture.md
+# Architecture
 
-# Architecture (PWA-only, Linux-first, TS Worker core)
+LaserFather is a Linux-first, PWA-only application. It uses React for the UI and a TypeScript Worker for the core logic.
 
-High-level
-- A single PWA built with Vite + React + TypeScript under `apps/pwa`.
-- All CAM and G-code generation runs in a Web Worker (TypeScript), not in the UI thread.
-- UI remains responsive; core remains portable.
+## High Level
 
-Runtime components
-1) UI thread (React)
-- Editor state, selection, transforms, layer management.
-- Renders vectors, images, and previews (SVG).
-- Performs persistence (IndexedDB) and import/export (File API).
-- Owns Web Serial device control.
-- Current wiring: `apps/pwa/src/ui/App.tsx` builds a document, parses SVGs/Images, sends it to the worker, and exports G-code.
+We built a single PWA. You will find it in `apps/pwa`. All the heavy math runs in a Web Worker so the UI stays fast. The core CAM logic is portable and does not depend on the browser UI.
 
-2) Core worker (TypeScript)
-- Document normalization.
-- Geometry utilities (polyline ops, bbox, ordering, matrix transforms).
-- CAM planner (vector toolpaths + raster scanlines).
-- G-code emitter (GRBL-oriented, configurable).
+## Runtime Components
 
-Hard boundaries
-- apps/pwa/src/core must not import from:
-  - window/document (except standard DOM types if polyfilled/available like ImageData)
-  - canvas/webgl
-  - indexeddb
-  - navigator.serial
-- apps/pwa/src/io contains all browser integrations.
+**The UI Thread**
+This is where React lives. It handles the editor state and layer management. It renders your vectors and images. It also manages saving data to your browser's database. This thread owns the Web Serial connection to your machine.
 
-Current module layout
-- apps/pwa/src/core
-  - model.ts (document + CAM + machine types)
-  - geom.ts (transforms + polyline utilities)
-  - cam.ts (rect -> polyline + raster generation dispatch + plan ordering)
-  - raster.ts (image -> scanline toolpaths)
-  - svgImport.ts (SVG string -> PathObj using DOMParser)
-  - gcode.ts (G-code emission + stats)
-  - ping.ts (minimal core entry)
-- apps/pwa/src/shared
-  - workerProtocol.ts (shared request/response types)
-  - ids.ts (request id helper)
-- apps/pwa/src/worker
-  - handler.ts (pure request router)
-  - worker.ts (postMessage adapter)
-- apps/pwa/src/ui
-  - App.tsx (Main layout, state container)
-  - panels/MachinePanel.tsx (Machine control logic: DRO, Jog, Stream)
-  - workerClient.ts (UI-side RPC helper)
-- apps/pwa/src/io
-  - registerServiceWorker.ts
-  - grblDriver.ts (Web Serial + simulated driver)
-- apps/pwa/public
-  - manifest.webmanifest
-  - sw.js
-  - icon.svg
-- apps/pwa/tests/golden
-  - fixtures + expected G-code outputs
+**The Core Worker**
+This runs in the background. It normalizes your documents. It handles all geometry math like transforms and bounding boxes. It generates the toolpaths for vector cuts and raster engraves. Finally, it turns those toolpaths into G-code.
 
+## Hard Boundaries
 
+We have strict rules for `apps/pwa/src/core`. It cannot touch the DOM or the window object. It cannot use Canvas or WebGL directly. It cannot access IndexedDB or Serial ports. All browser integrations live in `apps/pwa/src/io` instead.
 
-Project persistence (local-first)
-- Store projects in IndexedDB:
-  - document.json
-  - assets (images) keyed by content hash (later)
-  - settings (cam + machine profile)
-- Export: generate .gcode file for download (MVP).
-- Project file packaging (zip) is optional later; do not block MVP on it.
+## Module Layout
 
-Machine control (GRBL)
-- A "Machine" tab handled by `MachinePanel`.
-- disabled if Web Serial is unavailable.
-- Streaming uses ack-mode (line -> wait ok/error -> next).
+**Core (`apps/pwa/src/core`)**
+This folder holds the logic. `model.ts` defines our types. `geom.ts` handles math. `cam.ts` plans the cuts. `raster.ts` converts images. `gcode.ts` writes the final output.
 
-Why this structure stays portable
-- All “hard stuff” (CAM/G-code) is isolated behind a message protocol.
-- Replacing the worker implementation later does not require rewriting UI or IO layers.
+**Shared (`apps/pwa/src/shared`)**
+These types are used by both the UI and the Worker. This keeps them in sync.
+
+**Worker (`apps/pwa/src/worker`)**
+This is the bridge. It receives messages from the UI and calls the Core functions.
+
+**UI (`apps/pwa/src/ui`)**
+This is what you see. `App.tsx` is the main container. `MachinePanel` controls the laser.
+
+**IO (`apps/pwa/src/io`)**
+This connects to the outside world. `grblDriver.ts` talks to your machine via USB.
+
+## Persistence
+
+We save your work locally using IndexedDB. We store the document JSON and settings. You can export your result as a `.gcode` file.
+
+## Machine Control
+
+The Machine tab handles the laser. It disables itself if you cannot connect via Serial. We stream G-code one line at a time. We wait for an "ok" from the machine before sending the next line.
+
+## Portability
+
+We keep the hard stuff isolated. We hide it behind a message protocol. This means we can change the core engine later without breaking the UI.
