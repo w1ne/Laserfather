@@ -1,3 +1,4 @@
+import { serial as polyfillSerial } from "web-serial-polyfill";
 export type StatusState = "IDLE" | "RUN" | "HOLD" | "ALARM" | "UNKNOWN";
 
 export type Position = {
@@ -180,10 +181,26 @@ export function createWebSerialGrblDriver(options: WebSerialOptions = {}): GrblD
       if (connected) {
         return;
       }
-      if (typeof navigator === "undefined" || !("serial" in navigator)) {
+
+      // Determine which serial implementation to use
+      let serialImpl = navigator.serial;
+
+      // Check if we are on Android (heuristic) or if native serial is missing
+      const isAndroid = /android/i.test(navigator.userAgent);
+      const isNativeSupported = "serial" in navigator;
+
+      if (!isNativeSupported || isAndroid) {
+        // Force polyfill on Android because native implementation is often blocked/shimmed incorrectly
+        // or simply prefer the polyfill for reliability via WebUSB.
+        serialImpl = polyfillSerial;
+        console.log("Using Web Serial Polyfill (WebUSB)");
+      }
+
+      if (!serialImpl) {
         throw new Error("Web Serial is not supported in this browser.");
       }
-      port = await navigator.serial.requestPort();
+
+      port = await serialImpl.requestPort();
       await port.open({ baudRate });
       reader = port.readable?.getReader() ?? null;
       writer = port.writable?.getWriter() ?? null;
