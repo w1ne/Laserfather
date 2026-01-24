@@ -17,8 +17,8 @@ export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
                 </div>
                 <div className="modal-body" style={{ lineHeight: "1.6", color: "#333" }}>
                     <p>
-                        <strong>LaserFather v1.0.0</strong><br />
-                        Release 1.0
+                        <strong>LaserFather v{__APP_VERSION__}</strong> <span style={{ fontSize: "0.8em", opacity: 0.6 }}>({__GIT_SHA__})</span><br />
+                        Release {__APP_VERSION__}
                     </p>
                     <hr style={{ margin: "16px 0", border: "0", borderTop: "1px solid #eee" }} />
                     <p>
