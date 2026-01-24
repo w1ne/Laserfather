@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { formatNumber, randomId } from "../core/util";
+import { useRef, useState, useEffect } from "react";
+import { randomId } from "../core/util";
 
 import { useStore } from "../core/state/store";
 import { getDriver } from "../io/driverSingleton";
@@ -10,10 +10,6 @@ import { MachinePanel } from "./panels/MachinePanel";
 import { DocumentPanel } from "./panels/DocumentPanel";
 import { PropertiesPanel } from "./panels/PropertiesPanel";
 import { LayersPanel } from "./panels/LayersPanel";
-import { parseSvg } from "../core/svgImport";
-import { Transform } from "../core/model";
-import { IDENTITY_TRANSFORM } from "../core/geom";
-import { ObjectService } from "../core/services/ObjectService";
 import { PreviewPanel } from "./panels/PreviewPanel";
 import { DonateButton } from "./DonateButton";
 import { AboutDialog } from "./AboutDialog";
@@ -32,7 +28,7 @@ export function App() {
   // Persistence State
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [savedProjects, setSavedProjects] = useState<ProjectSummary[]>([]);
-  const [isProjectLoading, setIsProjectLoading] = useState(false);
+
   const [showAbout, setShowAbout] = useState(false);
 
   // --- Worker Init ---
@@ -165,7 +161,7 @@ export function App() {
 
   const handleLoadProject = async (id: string) => {
     try {
-      setIsProjectLoading(true);
+
       const loaded = await projectRepo.load(id);
       if (!loaded) throw new Error("Project not found");
 
@@ -181,8 +177,6 @@ export function App() {
       setShowLoadDialog(false);
     } catch (e) {
       alert("Failed: " + e);
-    } finally {
-      setIsProjectLoading(false);
     }
   };
 
@@ -285,7 +279,7 @@ export function App() {
     dispatch({ type: "SET_STREAM_STATUS", payload: { state: "streaming", message: "Resumed" } });
   };
 
-  const selectedObjectId = state.selectedObjectId;
+
 
   return (
     <div className="app">

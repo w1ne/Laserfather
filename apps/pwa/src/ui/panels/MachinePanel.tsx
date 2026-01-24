@@ -443,10 +443,4 @@ export function MachinePanel({
     );
 }
 
-// Missing helpers in MachineService needs to be checked or simulated
-const handleReset = () => {
-    // In service or we just import getDriver here for raw commands?
-    // Let's assume we add SoftReset to MachineService or just use a helper
-    // For now I'll just leave it out or add to MachineService quickly?
-    // Let's assume MachineService has it.
-};
+

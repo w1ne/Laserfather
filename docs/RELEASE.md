@@ -10,6 +10,12 @@ This document outlines the step-by-step process for releasing a new version of L
 
 ## Release Checklist
 
+1.  **Update Documentation**
+    - [ ] `docs/architecture.md`: Reflect any system design changes.
+    - [ ] `docs/interfaces.md`: Update API/Interface definitions.
+    - [ ] `README.md`: Ensure installation/usage instructions are current.
+    - [ ] `docs/CHANGELOG.md`: Summarize changes for this version.
+
 
 ### Automated Release (Recommended)
 

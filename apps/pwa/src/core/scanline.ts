@@ -12,7 +12,7 @@ type Segment = {
 export function scanlineFill(
     paths: PolylinePath[],
     lineInterval: number,
-    angle: number = 0 // Rotation support to be added later, for now assuming 0 (horizontal)
+    _angle: number = 0 // Rotation support to be added later, for now assuming 0 (horizontal)
 ): PolylinePath[] {
     if (paths.length === 0) return [];
 

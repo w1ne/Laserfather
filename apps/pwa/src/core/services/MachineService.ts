@@ -1,8 +1,7 @@
-import { AppState } from "../state/types";
 import { getDriver } from "../../io/driverSingleton";
 
 export const MachineService = {
-    jog: async (x: number, y: number, z: number, speed: number, relative: boolean = true) => {
+    jog: async (x: number, y: number, z: number = 0, speed: number = 1000, _relative: boolean = true) => {
         const driver = getDriver();
         if (!driver.isConnected()) return;
         const cmd = `$J=G91 G21 X${x} Y${y} F${speed}`;

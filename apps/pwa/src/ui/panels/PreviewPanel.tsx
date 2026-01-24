@@ -74,12 +74,7 @@ export function PreviewPanel({
         return [];
     }, [gcode, viewMode]);
 
-    // Allow panning with left click if target is the background
-    const handleBackgroundDown = (e: React.PointerEvent) => {
-        if (e.button === 0) {
-            handlers.onPointerDown(e);
-        }
-    };
+
 
     return (
         <div className={`panel panel--preview ${className || ""}`}>
