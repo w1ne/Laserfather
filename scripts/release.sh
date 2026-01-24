@@ -41,6 +41,10 @@ cd apps/pwa
 npm version $NEW_VERSION --no-git-tag-version
 cd ../..
 
+# 4b. Sync Root Lockfile (Critical for npm ci)
+echo "🔄 Syncing lockfile..."
+npm install --package-lock-only --ignore-scripts
+
 # 5. Commit and Tag
 git add .
 git commit -m "chore: release v$NEW_VERSION"
