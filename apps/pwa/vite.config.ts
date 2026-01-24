@@ -8,12 +8,14 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version || "dev"),
     __GIT_SHA__: JSON.stringify(
+      process.env.GITHUB_REF_NAME || // e.g. v1.1.0
+      process.env.GITHUB_SHA?.substring(0, 7) || // e.g. a1b2c3d
       (() => {
         try {
           const { execSync } = require("child_process");
           return execSync("git describe --tags --always --dirty").toString().trim();
         } catch {
-          return "unknown";
+          return "dev";
         }
       })()
     )
