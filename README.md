@@ -35,11 +35,19 @@ Start the local server.
 npm run dev
 ```
 
+
+### Release
+To cut a new release (merge to master, tag, push):
+```bash
+npm run release [patch|minor|major]
+```
+
 ### Testing
 Run the test suite.
 ```bash
 npm run test
 ```
+
 
 ## Linux Setup
 
