@@ -10,73 +10,29 @@ This document outlines the step-by-step process for releasing a new version of L
 
 ## Release Checklist
 
-### 1. Merge Develop to Master
-The `master` branch is for stable releases only.
+
+### Automated Release (Recommended)
+
+Run the release script to automatically run tests, merge, bump version, tag, and push.
 
 ```bash
-# Swith to master and update
-git checkout master
-git pull origin master
+# For a patch release (0.1.0 -> 0.1.1)
+npm run release patch
 
-# Merge develop into master
-git merge develop
+# For a minor release (0.1.0 -> 0.2.0)
+npm run release minor
 ```
 
-### 2. Update Version & Changelog
-Bump the version number for the release.
-
-1.  **package.json**: Update `version` to `x.x.x` in root.
-2.  **apps/pwa/package.json**: Update `version` to `x.x.x` in app.
-3.  **docs/CHANGELOG.md**: Add header `## X.X.X - YYYY-MM-DD` and move "Unreleased" changes under it.
-
-### 3. Commit and Tag
-Create the release commit and tag on `master`.
-
-```bash
-# Stage changes
-git add .
-
-# Commit with release message
-git commit -m "chore: release v1.1.0"
-
-# Create a signed tag (optional but recommended)
-git tag v1.1.0
-```
-
-### 4. Push Release
-Push the `master` branch and the new tag to GitHub. **This triggers the Deployment Pipeline.**
-
-```bash
-# Push commits
-git push origin master
-
-# Push tags (This triggers deployment!)
-git push origin v1.1.0
-```
-
-### 5. Sync Develop
-Merge the release commit (version bump) back into `develop` so development continues with the correct version history.
-
-```bash
-git checkout develop
-git merge master
-git push origin develop
-```
-
-### 6. GitHub Release
-Create the official release on GitHub.
+### GitHub Release (Final Step)
+After the script finishes, creates the draft release on GitHub.
 
 1.  Go to [Releases](https://github.com/w1ne/Laserfather/releases).
 2.  Click **Draft a new release**.
-3.  Choose the tag you just pushed (`v1.1.0`).
-4.  Paste the release notes from `docs/CHANGELOG.md`.
-5.  Click **Publish release**.
+3.  Choose the tag created by the script.
+4.  Paste notes from `docs/CHANGELOG.md`.
+5.  Publish.
 
-Alternatively, use the CLI:
-```bash
-gh release create v1.1.0 --title "v1.1.0" --notes-file release_notes.txt
-```
-
+---
 ## Best Practices
 - **Semantic Versioning**: Follow [SemVer](https://semver.org/).
     - Major (1.0.0): Breaking changes

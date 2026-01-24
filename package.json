@@ -10,7 +10,9 @@
     "dev": "npm --prefix apps/pwa run dev",
     "build": "npm --prefix apps/pwa run build",
     "preview": "npm --prefix apps/pwa run preview",
-    "test": "npm --prefix apps/pwa run test"
+    "test": "npm --prefix apps/pwa run test",
+    "lint": "npm --prefix apps/pwa run lint",
+    "release": "./scripts/release.sh"
   },
   "devDependencies": {
     "@types/w3c-web-serial": "^1.0.8",
