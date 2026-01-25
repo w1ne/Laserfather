@@ -2,6 +2,18 @@
 
 All notable changes to LaserFather.
 
+## 1.1.2 - 2026-01-25
+
+### Added
+**Google Analytics**
+Added GA4 tracking to better understand user behavior. Tracking is strictly limited to production domains (laserfather.com) and completely disabled on localhost/dev environments.
+
+## 1.1.1 - 2026-01-25
+
+### Fixed
+**Version Display**
+Fixed an issue where the About dialog showed `(unknown)` instead of the correct version/git hash. The build system now robustly detects version metadata from GitHub Actions environment variables.
+
 ## 1.1.0 - 2026-01-24
 
 ### Added
