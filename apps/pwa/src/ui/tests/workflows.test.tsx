@@ -99,8 +99,7 @@ describe("E2E Workflows", () => {
         fireEvent(window, pasteEvent);
 
         // 3. Generate G-code (Design Tab)
-        // Find "Generate G-code" button
-        const generateBtn = await screen.findByText("Generate G-code");
+        const generateBtn = await screen.findByText("Generate");
         fireEvent.click(generateBtn);
 
         // 4. Switch to Machine Tab
@@ -152,9 +151,7 @@ describe("E2E Workflows", () => {
         fireEvent(window, pasteEvent);
 
         // 3. Generate G-code (Design Tab)
-        // Wait for generation button to appear/be ready?
-        // Actually, paste handles import. Generate button is always there?
-        const generateBtn = await screen.findByText("Generate G-code");
+        const generateBtn = await screen.findByText("Generate");
         fireEvent.click(generateBtn);
 
         // 4. Switch to Machine Tab
