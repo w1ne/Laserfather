@@ -13,6 +13,16 @@ All notable changes to Laseryx.
 - Smart ordering: starts with path closest to origin, always moves to nearest unvisited path.
 - Considers both forward and reverse directions for each path.
 
+### Improved
+**UI Redesign (Operations Panel)**
+- Redesigned Operations panel with a card-based layout for layer rows.
+- Prevents text clipping on layer names and improves information density.
+- Balanced button sizing and streamlined action primary/secondary hierarchy.
+- Improved "Optimize path order" UI to be more compact and less intrusive.
+- Refined button labels for better clarity ("Add Layer", "Material Library").
+- Integrated "New Material" creation directly into the Material Library dialog.
+- Replaced bulky inline styling with a modern, consistent CSS utility system.
+
 ### Technical
 - Added `pathOptimizer.ts` with core optimization logic.
 - Integrated optimizer into CAM pipeline (`cam.ts`).
