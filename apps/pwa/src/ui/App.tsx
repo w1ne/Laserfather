@@ -6,6 +6,7 @@ import { getDriver } from "../io/driverSingleton";
 import { createWorkerClient } from "./workerClient";
 import { projectRepo, ProjectSummary } from "../io/projectRepo";
 import { machineRepo } from "../io/machineRepo";
+import { materialRepo } from "../io/materialRepo";
 import { MachinePanel } from "./panels/MachinePanel";
 import { DocumentPanel } from "./panels/DocumentPanel";
 import { PropertiesPanel } from "./panels/PropertiesPanel";
@@ -13,12 +14,16 @@ import { LayersPanel } from "./panels/LayersPanel";
 import { PreviewPanel } from "./panels/PreviewPanel";
 import { DonateButton } from "./DonateButton";
 import { AboutDialog } from "./AboutDialog";
+import { MaterialManagerDialog } from "./dialogs/MaterialManagerDialog";
+import { useToast } from "./hooks/useToast";
+import { ToastContainer } from "./components/Toast";
 import "./app.css";
 
 export function App() {
   const { state, dispatch } = useStore();
   const { ui, machineConnection, document: doc, camSettings, machineProfile } = state;
   const { activeTab } = ui;
+  const toast = useToast();
 
   // Local state for things that don't need to be global yet (Project Loading, Worker init)
   // Worker could be global, but keeping it simple for now.
@@ -30,6 +35,8 @@ export function App() {
   const [savedProjects, setSavedProjects] = useState<ProjectSummary[]>([]);
 
   const [showAbout, setShowAbout] = useState(false);
+  const [showMaterialManager, setShowMaterialManager] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<any>(null); // BeforeInstallPromptEvent
 
   // --- Worker Init ---
   useEffect(() => {
@@ -46,6 +53,47 @@ export function App() {
       clientRef.current = null;
     };
   }, []);
+
+  // --- PWA Install Prompt ---
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  // --- Keyboard Shortcuts ---
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isZ = e.key.toLowerCase() === "z";
+      const isY = e.key.toLowerCase() === "y";
+      const isMod = e.ctrlKey || e.metaKey;
+
+      if (isMod && isZ) {
+        e.preventDefault();
+        if (e.shiftKey) dispatch({ type: "REDO" });
+        else dispatch({ type: "UNDO" });
+      } else if (isMod && isY) {
+        e.preventDefault();
+        dispatch({ type: "REDO" });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [dispatch]);
+
+  const handleInstallClick = () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    installPrompt.userChoice.then((choice: any) => {
+      if (choice.outcome === "accepted") {
+        setInstallPrompt(null);
+      }
+    });
+  };
 
   // --- Machine Profile Init ---
   useEffect(() => {
@@ -73,6 +121,20 @@ export function App() {
       }
     };
     initMachines();
+  }, [dispatch]);
+
+  // --- Material Presets Init ---
+  useEffect(() => {
+    const initMaterials = async () => {
+      try {
+        await materialRepo.initDefaults();
+        const presets = await materialRepo.list();
+        dispatch({ type: "SET_MATERIAL_PRESETS", payload: presets });
+      } catch (e) {
+        console.error("Failed to load material presets", e);
+      }
+    };
+    initMaterials();
   }, [dispatch]);
 
   // --- Machine Status Polling ---
@@ -146,9 +208,9 @@ export function App() {
         }
       }
       await projectRepo.save(docClone, assets, name);
-      alert("Project saved!");
+      toast.success("Project saved!");
     } catch (e) {
-      alert("Failed: " + e);
+      toast.error("Failed to save project: " + String(e));
     }
   };
 
@@ -156,7 +218,7 @@ export function App() {
     try {
       setSavedProjects(await projectRepo.list());
       setShowLoadDialog(true);
-    } catch (e) { alert(String(e)); }
+    } catch (e) { toast.error("Failed to list projects: " + String(e)); }
   };
 
   const handleLoadProject = async (id: string) => {
@@ -176,15 +238,20 @@ export function App() {
       dispatch({ type: "SET_DOCUMENT", payload: doc });
       setShowLoadDialog(false);
     } catch (e) {
-      alert("Failed: " + e);
+      toast.error("Failed to load project: " + String(e));
     }
   };
 
   const handleDeleteProject = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm("Delete?")) {
-      await projectRepo.delete(id);
-      setSavedProjects(await projectRepo.list());
+    if (confirm("Delete this project?")) {
+      try {
+        await projectRepo.delete(id);
+        setSavedProjects(await projectRepo.list());
+        toast.success("Project deleted");
+      } catch (e) {
+        toast.error("Failed to delete project: " + String(e));
+      }
     }
   };
 
@@ -197,6 +264,7 @@ export function App() {
 
   // --- G-code Generation State ---
   const [generatedGcode, setGeneratedGcode] = useState<string | null>(null);
+  const [jobStats, setJobStats] = useState<{ estTimeS: number; travelMm: number; markMm: number; segments: number } | null>(null);
   const [generationState, setGenerationState] = useState<{ status: "idle" | "working" | "done" | "error"; message?: string }>({ status: "idle" });
   const [previewMode, setPreviewMode] = useState<"design" | "gcode">("design");
 
@@ -208,10 +276,12 @@ export function App() {
       const dialect = { newline: "\n", useG0ForTravel: true, powerCommand: "S", enableLaser: "M4", disableLaser: "M5" } as any;
       const result = await clientRef.current.generateGcode(doc, camSettings, machineProfile, dialect);
       setGeneratedGcode(result.gcode);
+      setJobStats(result.stats);
       setGenerationState({ status: "done", message: "Ready" });
       setPreviewMode("gcode");
     } catch (e) {
       setGeneratedGcode(null);
+      setJobStats(null);
       setGenerationState({ status: "error", message: String(e) });
     }
   };
@@ -225,7 +295,7 @@ export function App() {
       a.href = url;
       a.download = "project.gcode";
       a.click();
-    } catch (e) { alert(e); }
+    } catch (e) { toast.error("Failed to download G-code: " + String(e)); }
   };
 
   // --- Export / Stream Logic wrappers --- 
@@ -249,7 +319,7 @@ export function App() {
   // Streaming Handlers
   const handleStreamStart = async () => {
     if (!generatedGcode) {
-      alert("Please generate G-code first!");
+      toast.warning("Please generate G-code first!");
       return;
     }
     try {
@@ -292,6 +362,14 @@ export function App() {
             <button onClick={handleListProjects}>Open</button>
             <button onClick={handleSaveProject}>Save</button>
             <button onClick={() => setShowAbout(true)}>About</button>
+            {installPrompt && (
+              <button
+                onClick={handleInstallClick}
+                style={{ background: "#4f46e5", color: "white", border: "none" }}
+              >
+                Install App
+              </button>
+            )}
             <DonateButton />
           </div>
         </div>
@@ -332,9 +410,11 @@ export function App() {
               <LayersPanel
                 onGenerate={handleGenerateGcode}
                 onDownload={handleDownloadGcode}
+                onOpenMaterialManager={() => setShowMaterialManager(true)}
                 generationState={generationState}
                 hasGcode={!!generatedGcode}
                 isWorkerReady={workerStatus.ready}
+                jobStats={jobStats}
               />
             </div>
             <div className="app__preview-area" style={{ position: "relative" }}>
@@ -412,6 +492,8 @@ export function App() {
         )}
       </main>
       <AboutDialog isOpen={showAbout} onClose={() => setShowAbout(false)} />
+      <MaterialManagerDialog isOpen={showMaterialManager} onClose={() => setShowMaterialManager(false)} />
+      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismissToast} />
     </div>
   );
 }

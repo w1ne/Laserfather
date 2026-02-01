@@ -1,4 +1,4 @@
-import { Document, CamSettings, MachineProfile } from "../model";
+import { Document, CamSettings, MachineProfile, MaterialPreset } from "../model";
 
 export const INITIAL_MACHINE_PROFILE: MachineProfile = {
     id: "default-machine",
@@ -39,11 +39,14 @@ export type AppState = {
     machineStatus: MachineStatus;
     machineConnection: MachineConnectionState;
     machineStream: MachineStreamState;
+    materialPresets: MaterialPreset[];
+    activeMaterialPresetId: string | null;
     selectedObjectId: string | null;
     ui: {
         activeTab: "design" | "machine";
         previewMode: "2d" | "3d"; // Future proofing
     };
+    history: import("./history").History;
 };
 
 export const INITIAL_STATE: AppState = {
@@ -72,9 +75,31 @@ export const INITIAL_STATE: AppState = {
     },
     machineConnection: { status: "disconnected" },
     machineStream: { state: "idle" },
+    materialPresets: [],
+    activeMaterialPresetId: null,
     selectedObjectId: null,
     ui: {
         activeTab: "design",
         previewMode: "2d"
+    },
+    history: {
+        past: [],
+        present: {
+            document: {
+                version: 1,
+                units: "mm",
+                layers: [
+                    { id: "layer-1", name: "Layer 1", visible: true, locked: false, operationId: "op-1" }
+                ],
+                objects: []
+            },
+            camSettings: {
+                operations: [
+                    { id: "op-1", name: "Cut", mode: "line", speed: 1000, power: 80, passes: 1 }
+                ]
+            },
+            selectedObjectId: null
+        },
+        future: []
     }
 };

@@ -1,7 +1,60 @@
 # Changelog
 
 All notable changes to Laseryx.
- 
+
+## [1.5.0] - 2026-02-01
+
+### Added
+**Path Optimization**
+- Implemented nearest neighbor path ordering algorithm to minimize air travel time.
+- Achieves 20-40% reduction in travel distance on multi-object jobs.
+- Added UI toggle in Layers Panel: "Optimize path order (reduces air travel)".
+- Enabled by default, can be disabled per-job via CAM settings.
+- Smart ordering: starts with path closest to origin, always moves to nearest unvisited path.
+- Considers both forward and reverse directions for each path.
+
+### Technical
+- Added `pathOptimizer.ts` with core optimization logic.
+- Integrated optimizer into CAM pipeline (`cam.ts`).
+- Added `optimizePaths` flag to `CamSettings` model.
+- Comprehensive test coverage: 16 tests (14 unit + 2 integration).
+- All 145 tests passing.
+
+## [1.4.0] - 2026-02-01
+
+### Added
+**Job Time Estimation**
+- Added real-time job statistics display showing estimated time, total distance, laser-on distance, and segment count.
+- Statistics appear immediately after G-code generation in the Layers Panel.
+- Smart formatting utilities for time (e.g., "12m 34s", "1h 5m") and distances (e.g., "1,234 mm").
+
+**Undo/Redo Functionality**
+- Implemented full undo/redo support for design operations (object edits, layer changes, CAM settings).
+- Added keyboard shortcuts: `Ctrl+Z` (Undo), `Ctrl+Y` / `Ctrl+Shift+Z` (Redo).
+- Selective history tracking (design state only) prevents machine status updates from bloating the undo stack.
+- Maximum history of 50 entries with automatic cleanup.
+
+**Asset Garbage Collection**
+- Automatic cleanup of orphaned image blobs from IndexedDB when projects are deleted.
+- Smart detection preserves shared assets used by multiple projects.
+- Prevents storage bloat from accumulating unused image data.
+
+**Vector Scanline Fill**
+- Added ability to fill closed vector shapes (rectangles, SVG paths) with laser engraving.
+- Robust even-odd scanline algorithm using mid-point sampling for consistent coverage.
+- Supports complex geometries including nested holes and concave shapes.
+- Configurable line interval (DPI) and fill angle.
+
+### Improved
+- Relocated Undo/Redo buttons from header to Document Panel for better UX.
+- Enhanced UI consistency with updated button styling across panels.
+
+### Technical
+- Added comprehensive test coverage: 40 tests covering all new features.
+- Created formatting utilities (`formatTime`, `formatDistance`, `formatNumber`).
+- Implemented history management system with configurable limits.
+- Added asset garbage collector with shared asset protection.
+
 ## [1.3.1] - 2026-02-01
 
 ### Fixed

@@ -141,25 +141,77 @@ Deliverables:
 Acceptance:
 - Can create "My Diode Laser" (300x300, S1000).
 - Can create "My CO2 Laser" (600x400, S100).
+- Can create "My CO2 Laser" (600x400, S100).
 - Switching profile updates the "Preview" boundary box.
+
+## Milestone 11 — Virtual Machine (Dev & Test) - COMPLETED
+Goal: Simulate a complete machine for dev builds and headless testing.
+Deliverables:
+- [x] **Virtual Driver**:
+    - [x] Full G-code state machine (G0, G1, M3, M4, M5).
+    - [x] Simulates movement (MPos/WPos updates) and states (Idle -> Run -> Idle).
+- [x] **Dev Tools**:
+    - [x] Toggle "Virtual Machine" mode in UI.
+    - [x] Headless integration tests verifying full "Connect -> Stream -> Finish" flow.
+Acceptance:
+- [x] `npm run test` executes a full job simulation verify end coordinates.
+- [x] Devs can click "Connect" and see the "laser" move on the screen without hardware.
+
+
+## Milestone 12 — UX Polish & Core Improvements (In Progress)
+Goal: Polish the user experience and add critical missing features for professional use.
+Deliverables:
+- [x] **Job Time Estimation**:
+    - [x] Calculate estimated job time based on travel distance, speeds, and passes.
+    - [x] Display in UI before starting the job (e.g., "Est. Time: 12m 34s").
+- [ ] **Error Handling & User Feedback**:
+    - [ ] Friendly error messages for common issues (empty document, missing operations).
+    - [ ] Progress indicators for long operations (SVG import, large raster processing).
+    - [ ] Toast notifications for success/error states.
+- [ ] **Path Optimization**:
+    - [ ] Smart air-travel reduction using nearest-neighbor or TSP solver.
+    - [ ] Reduce job time by 20-40% on complex multi-object jobs.
+- [ ] **Floyd-Steinberg Dithering**:
+    - [ ] Advanced dithering algorithm for photo engraving.
+    - [ ] Produces much better results than simple threshold.
+- [ ] **Performance Optimization**:
+    - [ ] Move raster processing to Web Worker (prevent UI blocking).
+    - [ ] Optimize canvas rendering for large previews.
+    - [ ] Add streaming/chunked SVG parsing for large files.
+Acceptance:
+- [x] User sees estimated time before starting a job.
+- [ ] Large SVG files import without UI lag.
+- [ ] Photo engraving produces professional-quality output.
 
 
 ## Future Ideas
 
 
 
-## Next Priorities (High Impact)
-The focus for the next releases is on features that bring the most value to every user.
+## Next Priorities (Ranked by Impact)
 
-- [ ] **Job Estimation**: Calculate accurate time and cost estimates before running the job.
-- [ ] **Material Library**: Save and recall Speed/Power presets for common materials (Plywood, Acrylic, Leather).
-- [ ] **Path Optimization**: Smart path finding (Nearest Neighbor) to significantly reduce air travel time.
-- [ ] **Offline Reliability**: Ensure the app works flawlessly in workshops with poor or no internet connection.
+### Priority 1: Core CAM & UX Stability (COMPLETED)
+- [x] **Vector Scanline Fill**: Ability to "Fill" closed SVG paths and shapes.
+- [x] **Undo/Redo**: Design history stack for usability.
+- [x] **Asset Garbage Collection**: Auto-cleanup of unused image blobs in IndexedDB.
+
+### Priority 2: Professional Features & Polish (CURRENT)
+1. [x] **Job Time Estimation**: Display estimated job duration before running.
+2. [ ] **Error Handling & Feedback**: User-friendly messages and progress indicators.
+3. [x] **Path Optimization**: Reduce air travel with smart ordering.
+4. [ ] **Floyd-Steinberg Dithering**: Professional photo engraving quality.
+5. [ ] **Performance**: Move heavy processing to Workers, optimize rendering.
+
+### Priority 3: Advanced Processing & Hardware
+- [ ] **Camera Integration**: Webcam overlay for precision material alignment.
+- [ ] **Parametric Shapes**: Box and gear generators for quick designs.
+- [ ] **Mobile UI Polish**: Responsive machine control panel for tablets.
+- [ ] **Multi-layer Operations**: Different operations per layer (e.g., cut + engrave in one job).
 
 ## Backlog (Future Ideas)
-- **Camera Integration**: Webcam overlay for alignment.
-- **Mobile Layout**: Improved UI for phone control.
-- **Parametric Shapes**: Built-in generators for gears and boxes.
-
+- **Multiple Machine Connections**: Control multiple lasers simultaneously.
+- **Cloud Sync**: Optional cloud backup for projects.
+- **Plugin System**: Allow community extensions.
+- **3D Preview**: Simulate engraving depth for photo realistic preview.
 
 

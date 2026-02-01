@@ -2,6 +2,7 @@ import { useStore } from "../../core/state/store";
 import { ObjectService } from "../../core/services/ObjectService";
 import { parseSvg } from "../../core/svgImport";
 import { PathObj, Transform } from "../../core/model";
+import { UndoToolbar } from "../components/UndoToolbar";
 
 export function DocumentPanel() {
     const { state, dispatch } = useStore();
@@ -95,6 +96,9 @@ export function DocumentPanel() {
                     <button className="button" style={{ fontSize: "11px", padding: "4px 8px" }} onClick={handleAddRectangle}>Add Rect</button>
                     <button className="button" style={{ fontSize: "11px", padding: "4px 8px" }} onClick={handleImportFile}>Import</button>
                 </div>
+            </div>
+            <div style={{ padding: "8px 12px", borderBottom: "1px solid #eee" }}>
+                <UndoToolbar />
             </div>
             <div className="panel__body">
                 <div className="list" style={{ gap: "4px", display: "flex", flexDirection: "column" }}>

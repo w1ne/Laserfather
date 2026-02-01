@@ -117,7 +117,9 @@ export const projectRepo = {
     async delete(id: string): Promise<void> {
         const db = await getDb();
         await db.delete('projects', id);
-        // TODO: Garbage collect assets not used by other projects
-        // For MVP, we leak assets if deleted.
+
+        // Garbage collect orphaned assets
+        const { collectGarbage } = await import('./assetGarbageCollector');
+        await collectGarbage();
     }
 };

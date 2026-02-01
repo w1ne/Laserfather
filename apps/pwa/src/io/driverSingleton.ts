@@ -2,7 +2,8 @@ import { createWebSerialGrblDriver, createSimulatedGrblDriver, GrblDriver } from
 
 let driverInstance: GrblDriver | null = null;
 
-let useSimulation = false;
+const urlParams = new URLSearchParams(window.location.search);
+let useSimulation = urlParams.get("virtual") === "true";
 
 export function setUseSimulation(enabled: boolean) {
     if (useSimulation !== enabled) {

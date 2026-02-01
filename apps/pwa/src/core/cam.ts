@@ -17,6 +17,8 @@ export type CamPlanResult = {
 };
 
 import { generateRasterToolpath } from "./raster";
+import { vectorFill } from "./fill";
+import { optimizePaths } from "./pathOptimizer";
 
 type IndexedPath = {
   path: PolylinePath;
@@ -76,9 +78,8 @@ export function planCam(document: Document, cam: CamSettings, images?: Map<strin
             warnings.push(`Missing image data for object ${obj.id}`);
           }
         } else {
-          // TODO: Implement Vector Scanline Fill here for Milestone 9b
-          // logical place: paths.push(...scanlineFill(obj));
-          warnings.push(`Vector Fill not implemented yet for ${obj.id}`);
+          // Implement Vector Scanline Fill here
+          paths.push(...vectorFill(objToPolylines(obj), operation.lineInterval || 0.1, operation.angle || 0));
         }
       } else {
         // Mode = "line" (Vector Cut/Score)
@@ -98,6 +99,11 @@ export function planCam(document: Document, cam: CamSettings, images?: Map<strin
     let ordered = paths;
     if (operation.mode === "line") {
       ordered = orderPaths(paths, operation);
+    }
+
+    // Apply path optimization if enabled (default: true)
+    if (cam.optimizePaths !== false) {
+      ordered = optimizePaths(ordered);
     }
 
     ops.push({ opId: operation.id, kind: "vector", paths: ordered });

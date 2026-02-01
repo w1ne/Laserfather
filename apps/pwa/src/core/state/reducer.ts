@@ -1,7 +1,62 @@
 import { AppState } from "./types";
 import { Action } from "./actions";
+import { pushState, undo, redo, UndoableState } from "./history";
+
+/**
+ * List of action types that should trigger a history snapshot.
+ */
+const UNDOABLE_ACTIONS = new Set([
+    "SET_DOCUMENT",
+    "ADD_LAYER",
+    "DELETE_LAYER",
+    "ADD_OBJECT",
+    "UPDATE_OBJECT",
+    "DELETE_OBJECT",
+    "SELECT_OBJECT",
+    "SET_CAM_SETTINGS",
+    "ADD_OPERATION"
+]);
 
 export function appReducer(state: AppState, action: Action): AppState {
+    // 1. Handle History Actions explicitly
+    if (action.type === "UNDO") {
+        const h = undo(state.history);
+        return {
+            ...state,
+            ...h.present,
+            history: h
+        };
+    }
+
+    if (action.type === "REDO") {
+        const h = redo(state.history);
+        return {
+            ...state,
+            ...h.present,
+            history: h
+        };
+    }
+
+    // 2. Perform the internal reduction
+    const newState = internalReducer(state, action);
+
+    // 3. If action was undoable, update history
+    if (UNDOABLE_ACTIONS.has(action.type)) {
+        const nextUndoable: UndoableState = {
+            document: newState.document,
+            camSettings: newState.camSettings,
+            selectedObjectId: newState.selectedObjectId
+        };
+        return {
+            ...newState,
+            history: pushState(state.history, nextUndoable)
+        };
+    }
+
+    return newState;
+}
+
+function internalReducer(state: AppState, action: Action): AppState {
     console.log("Action:", action.type, action);
     switch (action.type) {
         case "SET_DOCUMENT":
@@ -17,7 +72,6 @@ export function appReducer(state: AppState, action: Action): AppState {
             };
 
         case "DELETE_LAYER":
-            // Note: Validation logic (don't delete if objects exist) should happen in Service/Action creator
             return {
                 ...state,
                 document: {
@@ -42,7 +96,7 @@ export function appReducer(state: AppState, action: Action): AppState {
                     ...state.document,
                     objects: state.document.objects.map(obj =>
                         obj.id === action.payload.id
-                            ? { ...obj, ...action.payload.changes } as any // Simplified casting, proper merging handled by spread
+                            ? { ...obj, ...action.payload.changes } as any
                             : obj
                     )
                 }
@@ -82,21 +136,16 @@ export function appReducer(state: AppState, action: Action): AppState {
         case "SET_STREAM_STATUS":
             return { ...state, machineStream: action.payload };
 
-        // Machine Profile Reducers
         case "SET_MACHINE_PROFILES":
             return { ...state, machineProfiles: action.payload };
 
         case "ADD_MACHINE_PROFILE":
-            return {
-                ...state,
-                machineProfiles: [...state.machineProfiles, action.payload]
-            };
+            return { ...state, machineProfiles: [...state.machineProfiles, action.payload] };
 
         case "UPDATE_MACHINE_PROFILE": {
             const updatedProfiles = state.machineProfiles.map(p =>
                 p.id === action.payload.id ? { ...p, ...action.payload.changes } : p
             );
-            // If we updated the active one, sync it
             const active = updatedProfiles.find(p => p.id === state.activeMachineProfileId) || state.machineProfile;
             return {
                 ...state,
@@ -119,6 +168,15 @@ export function appReducer(state: AppState, action: Action): AppState {
                 machineProfile: found
             };
         }
+
+        case "SET_MATERIAL_PRESETS":
+            return { ...state, materialPresets: action.payload };
+
+        case "ADD_MATERIAL_PRESET":
+            return { ...state, materialPresets: [...state.materialPresets, action.payload] };
+
+        case "DELETE_MATERIAL_PRESET":
+            return { ...state, materialPresets: state.materialPresets.filter(p => p.id !== action.payload) };
 
         case "SET_ACTIVE_TAB":
             return { ...state, ui: { ...state.ui, activeTab: action.payload } };

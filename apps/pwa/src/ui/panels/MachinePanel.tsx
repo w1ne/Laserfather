@@ -3,6 +3,7 @@ import { MachineManagerDialog } from "../dialogs/MachineManagerDialog";
 import { useState } from "react";
 import { useStore } from "../../core/state/store";
 import { MachineService } from "../../core/services/MachineService";
+import { setUseSimulation, isSimulation } from "../../io/driverSingleton";
 
 type MachinePanelProps = {
     onConnect: () => void;
@@ -58,6 +59,23 @@ export function MachinePanel({
                         {f(state.machineProfile?.bedMm.w)} x {f(state.machineProfile?.bedMm.h)} mm
                     </div>
                 </div>
+
+                {import.meta.env.DEV && (
+                    <div style={{ padding: "0 4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <label style={{ fontSize: "12px", color: "#64748b", display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}>
+                            <input
+                                type="checkbox"
+                                checked={isSimulation()}
+                                onChange={(e) => {
+                                    setUseSimulation(e.target.checked);
+                                    // Force a re-render or notification if needed, but App.tsx polls the driver normally.
+                                    // For immediate UI update of the toggle itself, checked={isSimulation()} handles it.
+                                }}
+                            />
+                            Use Virtual Machine
+                        </label>
+                    </div>
+                )}
 
                 <div className="connection-status">
                     <div className={`status-badge ${machineConnection.status}`}>
