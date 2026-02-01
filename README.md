@@ -53,6 +53,13 @@ npm run test
 ```
 
 
+
+## Developer Tools
+
+We include a **Virtual Machine** for headless testing and simulated runs without hardware.
+- [Virtual Machine Documentation](docs/virtual-machine.md)
+- Enable via `?virtual=true` or in the Machine Panel.
+
 ## Linux Setup
 
 If you cannot connect to the serial port, check your permissions.

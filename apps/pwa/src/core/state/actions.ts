@@ -1,4 +1,4 @@
-import { Document, CamSettings, Layer, Obj, Operation, MachineProfile } from "../model";
+import { Document, CamSettings, Layer, Obj, Operation, MachineProfile, MaterialPreset } from "../model";
 import { MachineStatus, MachineConnectionState, MachineStreamState } from "./types";
 
 export type Action =
@@ -28,5 +28,14 @@ export type Action =
     | { type: "DELETE_MACHINE_PROFILE"; payload: string }
     | { type: "SELECT_MACHINE_PROFILE"; payload: string } // id
 
+    // Material Actions
+    | { type: "SET_MATERIAL_PRESETS"; payload: MaterialPreset[] }
+    | { type: "ADD_MATERIAL_PRESET"; payload: MaterialPreset }
+    | { type: "DELETE_MATERIAL_PRESET"; payload: string } // id
+
     // UI Actions
-    | { type: "SET_ACTIVE_TAB"; payload: "design" | "machine" };
+    | { type: "SET_ACTIVE_TAB"; payload: "design" | "machine" }
+
+    // History Actions
+    | { type: "UNDO" }
+    | { type: "REDO" };

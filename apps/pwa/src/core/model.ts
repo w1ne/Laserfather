@@ -89,6 +89,7 @@ export type Operation = {
 
 export type CamSettings = {
   operations: Operation[];
+  optimizePaths?: boolean; // Default: true
   global?: {
     curveToleranceMm?: number;
   };
@@ -139,4 +140,15 @@ export type JobStats = {
   travelMm: number;
   markMm: number;
   segments: number;
+};
+
+export type MaterialPreset = {
+  id: string;
+  name: string;
+  mode: OperationMode;
+  speed: number;
+  power: number;
+  passes: number;
+  lineInterval?: number;
+  angle?: number;
 };

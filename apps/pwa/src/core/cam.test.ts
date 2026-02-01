@@ -69,10 +69,10 @@ describe("cam", () => {
                 }
             ]
         };
-        // By default it takes the first object then finds closest.
-        // First object is obj1 (100,100). Next should be obj2 (0,0).
-        // Wait, orderShortestTravel uses remaining.shift() as first.
-        const result = planCam(doc, minCam);
+        // Wait, orderShortestTravel uses the END of the previous path to find the next start.
+        // So if we have two paths: (0,0)→(10,10) and (100,100)→(110,110),
+        // shortestTravel should pick the one closest to the end of the previous path.
+        const result = planCam(doc, { ...minCam, optimizePaths: false });
         expect(result.plan.ops[0].paths[0].points[0]).toEqual({ x: 100, y: 100 });
         expect(result.plan.ops[0].paths[1].points[0]).toEqual({ x: 0, y: 0 });
     });

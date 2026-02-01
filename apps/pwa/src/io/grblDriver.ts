@@ -187,7 +187,7 @@ export function createWebSerialGrblDriver(options: WebSerialOptions = {}): GrblD
       }
 
       // Determine which serial implementation to use
-      let serialImpl = navigator.serial;
+      let serialImpl: any = (navigator as any).serial;
 
       // Check if we are on Android (heuristic) or if native serial is missing
       const isAndroid = /android/i.test(navigator.userAgent);
@@ -206,7 +206,7 @@ export function createWebSerialGrblDriver(options: WebSerialOptions = {}): GrblD
 
       // Android/WebUSB often requires filters to show devices.
       // We list common USB-Serial chips used in lasers (CH340, CP210x, FTDI, CDC, Arduino).
-      const filters = (isAndroid || serialImpl === polyfillSerial) ? [
+      const filters = (isAndroid || serialImpl === (polyfillSerial as any)) ? [
         { usbVendorId: 0x1a86 }, // CH340
         { usbVendorId: 0x10c4 }, // CP210x (Silicon Labs)
         { usbVendorId: 0x0403 }, // FTDI
@@ -216,6 +216,9 @@ export function createWebSerialGrblDriver(options: WebSerialOptions = {}): GrblD
       ] : undefined;
 
       port = await serialImpl.requestPort({ filters });
+      if (!port) {
+        throw new Error("No serial port selected.");
+      }
       await port.open({ baudRate });
       reader = port.readable?.getReader() ?? null;
       writer = port.writable?.getWriter() ?? null;
@@ -304,128 +307,309 @@ export function createWebSerialGrblDriver(options: WebSerialOptions = {}): GrblD
   };
 }
 
-export function createSimulatedGrblDriver(options: SimulatedOptions = {}): SimulatedGrblDriver {
+// --- Virtual Driver Implementation ---
+
+export type VirtualGrblDriver = GrblDriver & {
+  getSentLines: () => string[];
+  pushAck: (ack: Ack) => void;
+  // Direct state manipulation for testing
+  setState: (state: Partial<StatusSnapshot>) => void;
+};
+
+type VirtualState = {
+  status: StatusState;
+  mpos: Position;
+  wpos: Position;
+  // Internal machine state
+  workOffset: Position; // G54 offset
+  feedRate: number;
+  spindleSpeed: number;
+  laserEnabled: boolean;
+  isAbsolute: boolean; // G90 vs G91
+  reportInches?: boolean; // G20 vs G21
+};
+
+export function createVirtualGrblDriver(options: SimulatedOptions = {}): VirtualGrblDriver {
   const ackQueue = [...(options.ackQueue ?? [])];
   const sentLines: string[] = [];
   let connected = false;
-  let status: StatusSnapshot = { state: options.initialState ?? "IDLE" };
   let activeStreamAbort: AbortController | null = null;
-  const responseDelayMs = options.responseDelayMs ?? 0;
+  const responseDelayMs = options.responseDelayMs ?? 10;
+
+  // Initial machine state
+  let state: VirtualState = {
+    status: options.initialState ?? "IDLE",
+    mpos: { x: 0, y: 0, z: 0 },
+    wpos: { x: 0, y: 0, z: 0 },
+    workOffset: { x: 0, y: 0, z: 0 },
+    feedRate: 0,
+    spindleSpeed: 0,
+    laserEnabled: false,
+    isAbsolute: true,
+    reportInches: false
+  };
 
   const delay = (ms: number, signal?: AbortSignal) => {
-    if (ms <= 0) {
-      return Promise.resolve();
-    }
+    if (ms <= 0) return Promise.resolve();
     return new Promise<void>((resolve, reject) => {
       const timer = setTimeout(() => {
-        if (signal) {
-          signal.removeEventListener("abort", onAbort);
-        }
+        signal?.removeEventListener("abort", onAbort);
         resolve();
       }, ms);
-
       const onAbort = () => {
         clearTimeout(timer);
         signal?.removeEventListener("abort", onAbort);
         reject(new Error("Stream aborted"));
       };
-
-      if (signal) {
-        if (signal.aborted) {
-          onAbort();
-          return;
-        }
-        signal.addEventListener("abort", onAbort, { once: true });
+      if (signal?.aborted) {
+        onAbort();
+        return;
       }
+      signal?.addEventListener("abort", onAbort, { once: true });
     });
   };
 
-  const sendLineInternal = async (line: string, signal?: AbortSignal): Promise<Ack> => {
-    if (!connected) {
-      throw new Error("Not connected");
+  const processGCode = (line: string): Ack & { dwell?: number } => {
+    let cleanLine = line.toUpperCase().trim();
+
+    // 1. Handle Jogging Prefix ($J=)
+    // GRBL jogging commands look like: $J=G91 G21 X10 F1000
+    // These commands MUST contain a distance mode (G90/G91).
+    // The modal state within $J only applies for that command.
+    let isJog = false;
+    if (cleanLine.startsWith("$J=")) {
+      isJog = true;
+      cleanLine = cleanLine.slice(3).trim();
     }
-    if (signal?.aborted) {
-      throw new Error("Stream aborted");
+
+    const parts = cleanLine.split(/\s+/);
+
+    // 2. Pre-scan for Units (G20/G21) 
+    // If not a jog, these are permanent. If a jog, they are temporary for this line.
+    let lineInches = state.reportInches;
+    if (parts.includes("G20")) {
+      lineInches = true;
+      if (!isJog) state.reportInches = true;
     }
-    sentLines.push(line);
-    await delay(responseDelayMs, signal);
-    const ack = ackQueue.shift() ?? { ok: true };
-    if (!ack.ok) {
-      status = { ...status, state: "ALARM" };
+    if (parts.includes("G21")) {
+      lineInches = false;
+      if (!isJog) state.reportInches = false;
     }
-    return ack;
+
+    // 3. Distance Mode (G90/G91)
+    let lineAbsolute = state.isAbsolute;
+    if (parts.includes("G90")) {
+      lineAbsolute = true;
+      if (!isJog) state.isAbsolute = true;
+    }
+    if (parts.includes("G91")) {
+      lineAbsolute = false;
+      if (!isJog) state.isAbsolute = false;
+    }
+
+    // 4. Value parsing helper (with unit handling)
+    const getVal = (char: string) => {
+      const regex = new RegExp(`${char}([\\d.-]+)`);
+      const match = cleanLine.match(regex);
+      if (!match) return null;
+      let val = parseFloat(match[1]);
+      // If units for this line are inches, convert to mm for internal state
+      if (lineInches) val = val * 25.4;
+      return val;
+    };
+
+    // 5. Command handling
+    let dwellVal = 0;
+
+    for (const part of parts) {
+      if (part === "$H") {
+        state.mpos = { x: 0, y: 0, z: 0 };
+        state.wpos = {
+          x: state.mpos.x - state.workOffset.x,
+          y: state.mpos.y - state.workOffset.y,
+          z: state.mpos.z - state.workOffset.z
+        };
+        return { ok: true };
+      }
+
+      if (part === "M3" || part === "M4") state.laserEnabled = true;
+      if (part === "M5") state.laserEnabled = false;
+
+      // Feed/Speed
+      if (part.startsWith("F")) state.feedRate = parseFloat(part.slice(1)) || state.feedRate;
+      if (part.startsWith("S")) state.spindleSpeed = parseFloat(part.slice(1)) || state.spindleSpeed;
+    }
+
+    // Raw getter for non-unit values
+    const getRawVal = (char: string) => {
+      const regex = new RegExp(`${char}([\\d.-]+)`);
+      const match = cleanLine.match(regex);
+      return match ? parseFloat(match[1]) : null;
+    };
+
+    if (cleanLine.includes("G4")) {
+      const p = getRawVal("P") ?? 0;
+      dwellVal = p * 1000;
+    }
+
+    // Work Offsets (G10 L20 / G92)
+    if (cleanLine.includes("G10") && cleanLine.includes("L20")) {
+      const x = getVal("X");
+      const y = getVal("Y");
+      const z = getVal("Z");
+      if (x !== null) state.workOffset.x = state.mpos.x - x;
+      if (y !== null) state.workOffset.y = state.mpos.y - y;
+      if (z !== null) state.workOffset.z = state.mpos.z - z;
+    }
+
+    if (cleanLine.includes("G92") && !cleanLine.includes("G92.1")) {
+      const x = getVal("X");
+      const y = getVal("Y");
+      const z = getVal("Z");
+      if (x !== null) state.workOffset.x = state.mpos.x - x;
+      if (y !== null) state.workOffset.y = state.mpos.y - y;
+      if (z !== null) state.workOffset.z = state.mpos.z - z;
+    }
+
+    const x = getVal("X");
+    const y = getVal("Y");
+    const z = getVal("Z");
+
+    const isMove = cleanLine.includes("G0") || cleanLine.includes("G1") ||
+      cleanLine.includes("G2") || cleanLine.includes("G3") || isJog;
+
+    if (isMove) {
+      if (lineAbsolute) {
+        if (x !== null) state.mpos.x = x + state.workOffset.x;
+        if (y !== null) state.mpos.y = y + state.workOffset.y;
+        if (z !== null) state.mpos.z = z + state.workOffset.z;
+      } else {
+        if (x !== null) state.mpos.x += x;
+        if (y !== null) state.mpos.y += y;
+        if (z !== null) state.mpos.z += z;
+      }
+    }
+
+    // Sync WPos
+    state.wpos = {
+      x: state.mpos.x - state.workOffset.x,
+      y: state.mpos.y - state.workOffset.y,
+      z: state.mpos.z - state.workOffset.z
+    };
+
+    return { ok: true, dwell: dwellVal };
   };
 
-  const disconnect = async () => {
-    activeStreamAbort?.abort();
-    activeStreamAbort = null;
-    connected = false;
-    status = { ...status, state: "UNKNOWN" };
+  const sendLineInternal = async (line: string, signal?: AbortSignal): Promise<Ack> => {
+    if (!connected) throw new Error("Not connected");
+    if (signal?.aborted) throw new Error("Stream aborted");
+
+    sentLines.push(line);
+    // Simulate processing time
+    await delay(responseDelayMs, signal);
+
+    // Inject queued ACKs (for simulating errors)
+    const queuedAck = ackQueue.shift();
+    if (queuedAck) {
+      if (!queuedAck.ok) state.status = "ALARM";
+      return queuedAck;
+    }
+
+    // Real processing
+    try {
+      if (line.trim() === "?") return { ok: true };
+      const res = processGCode(line);
+      if (res.dwell) {
+        await delay(res.dwell, signal);
+      }
+      return res;
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
   };
 
   return {
     connect: async () => {
       connected = true;
-      status = { ...status, state: status.state === "UNKNOWN" ? "IDLE" : status.state };
+      state.status = "IDLE";
     },
-    disconnect,
+    disconnect: async () => {
+      activeStreamAbort?.abort();
+      activeStreamAbort = null;
+      connected = false;
+      state.status = "UNKNOWN";
+    },
     isConnected: () => connected,
-    getStatus: async () => status,
+    getStatus: async () => {
+      // Construct GRBL status string like <Idle|MPos:0.000,0.000,0.000|FS:0,0>
+      const s = state.status;
+      const m = state.mpos;
+      const fs = `FS:${state.feedRate},${state.spindleSpeed}`;
+      // Note: Real GRBL reports MPos usually.
+      // We can attach the parsed object directly if we want, but the interface returns snapshot
+      return {
+        state: state.status,
+        mpos: { ...state.mpos },
+        wpos: { ...state.wpos }
+      };
+    },
     sendLine: async (line: string) => sendLineInternal(line),
     streamJob: (gcode: string, mode: StreamMode) => {
-      if (mode !== "ack") {
-        throw new Error("Buffered streaming is not implemented.");
-      }
+      if (mode !== "ack") throw new Error("Buffered streaming is not implemented.");
+
       const lines = parseGcodeLines(gcode);
       const abortController = new AbortController();
       activeStreamAbort = abortController;
+
       const done = (async () => {
-        status = { ...status, state: "RUN" };
+        state.status = "RUN";
         for (const line of lines) {
-          const ack = await sendLineInternal(line, abortController.signal);
-          if (!ack.ok) {
-            throw new Error(ack.error ?? "Streaming error");
+          // Check for pause
+          // Note: state.status is typed as StatusState which includes RUN, HOLD, etc.
+          while ((state.status as string) === "HOLD") {
+            if (abortController.signal.aborted) throw new Error("Stream aborted");
+            await delay(100);
           }
+
+          const ack = await sendLineInternal(line, abortController.signal);
+          if (!ack.ok) throw new Error(ack.error ?? "Streaming error");
         }
-        status = { ...status, state: "IDLE" };
+        state.status = "IDLE";
       })().catch((error) => {
         if (error instanceof Error && error.message.includes("aborted")) {
-          status = { ...status, state: "ALARM" };
+          state.status = "ALARM";
         }
         throw error;
       }).finally(() => {
-        if (activeStreamAbort === abortController) {
-          activeStreamAbort = null;
-        }
+        if (activeStreamAbort === abortController) activeStreamAbort = null;
       });
+
       return {
         done,
         abort: async () => {
-          await abortControllerAbort(abortController, async () => undefined);
+          if (!abortController.signal.aborted) abortController.abort();
+          state.status = "IDLE"; // Reset on abort
         }
       };
     },
     abort: async () => {
-      if (activeStreamAbort) {
-        activeStreamAbort.abort();
-      }
-      status = { ...status, state: "ALARM" };
+      activeStreamAbort?.abort();
+      state.status = "IDLE";
     },
-    pause: async () => {
-      status = { ...status, state: "HOLD" };
-    },
-    resume: async () => {
-      status = { ...status, state: "RUN" };
-    },
+    pause: async () => { state.status = "HOLD"; },
+    resume: async () => { state.status = "RUN"; },
     getSentLines: () => [...sentLines],
-    pushAck: (ack: Ack) => {
-      ackQueue.push(ack);
-    },
-    setStatus: (state: StatusState) => {
-      status = { ...status, state };
+    pushAck: (ack: Ack) => ackQueue.push(ack),
+    setState: (newState: Partial<StatusSnapshot>) => {
+      if (newState.state) state.status = newState.state;
+      if (newState.mpos) state.mpos = newState.mpos;
+      if (newState.wpos) state.wpos = newState.wpos;
     }
   };
 }
+
+// Deprecated alias for backward compatibility until refactor is complete
+export const createSimulatedGrblDriver = createVirtualGrblDriver;
 
 function parsePosition(csv: string): Position {
   const values = csv.split(",").map((value) => Number(value));
