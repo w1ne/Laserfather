@@ -490,22 +490,19 @@ select {
 .checkbox-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  gap: 8px;
+  padding: 4px 0;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .checkbox-row:hover {
-  background: #f1f5f9;
+  opacity: 0.8;
 }
 
 .checkbox-row input {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
 }
 

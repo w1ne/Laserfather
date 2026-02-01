@@ -242,10 +242,10 @@ export function LayersPanel({
                                 dispatch({ type: "SET_CAM_SETTINGS", payload: { ...camSettings, optimizePaths: e.target.checked } });
                             }}
                         />
-                        <div style={{ display: "flex", flexDirection: "column" }}>
-                            <span style={{ fontSize: "13px", fontWeight: "600", color: "#1e293b" }}>Optimize path order</span>
-                            <span style={{ fontSize: "11px", color: "#64748b" }}>Reduces air travel by ~20-40%</span>
-                        </div>
+                        <span style={{ fontSize: "12px", color: "#64748b" }}>
+                            <strong style={{ color: "#1e293b", marginRight: "4px" }}>Optimize path order</strong>
+                            (reduces air travel)
+                        </span>
                     </label>
 
                     {generationState.message && (
