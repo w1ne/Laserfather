@@ -1,6 +1,38 @@
 # Changelog
 
 All notable changes to Laseryx.
+ 
+## [1.3.1] - 2026-02-01
+
+### Fixed
+- **Virtual Machine Jogging**: Fixed "jumping" behavior during jogging by correctly handling `$J=` commands and relative moves.
+- **Driver Stability**: Improved Serial port handling and resolved TypeScript type mismatches in the I/O layer.
+- **UI Logic**: Fixed a synchronization issue with the "Virtual Machine" toggle in the Machine Panel.
+
+## [1.3.0] - 2026-02-01
+
+### Added
+**E2E Workflow Testing**
+- Implemented full automation for "Golden Path" workflows: Image Import -> Generate -> Burn.
+- Added support for SVG import automation and verification.
+- Verified system stability across the entire chain from UI to Virtual Driver.
+
+**PWA Installation**
+- Added native "Install App" button handling for supported browsers.
+- Improved offline capability and state persistence hints.
+
+**Virtual Machine (G-code Engine)**
+- Added support for **Arcs (G2/G3)** with endpoint tracking.
+- Added support for **Dwell (G4)** with accurate timing simulation.
+- Added support for **Unit Switching (G20/G21)** (Inches/Millimeters).
+- Added support for **Work Offsets (G10 L20 / G92)** for better coordinate management.
+
+**Material Library**
+- Initial implementation of material presets and management.
+
+### Fixed
+- Fixed several race conditions in the Virtual Driver streaming logic.
+- Improved PWA service worker stability.
 
 ## 1.2.0 - 2026-01-25
 
