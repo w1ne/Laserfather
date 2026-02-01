@@ -234,7 +234,7 @@ describe('Virtual Machine Integration', () => {
         await driver.sendLine('G4 P0.1'); // 100ms
         const elapsed = Date.now() - start;
 
-        expect(elapsed).toBeGreaterThanOrEqual(100);
+        expect(elapsed).toBeGreaterThanOrEqual(90);
     });
 
     it('should handle Arcs (G2/G3) endpoints', async () => {

@@ -117,7 +117,7 @@ describe("E2E Workflows", () => {
 
         // 6. Arm & Start
         // Find Arm Laser checkbox
-        const armCheckbox = screen.getByLabelText("Arm Laser");
+        const armCheckbox = await screen.findByLabelText("Arm Laser");
         fireEvent.click(armCheckbox);
 
         // Find Start Job
@@ -168,7 +168,7 @@ describe("E2E Workflows", () => {
         });
 
         // 6. Arm & Start
-        const armCheckbox = screen.getByLabelText("Arm Laser");
+        const armCheckbox = await screen.findByLabelText("Arm Laser");
         fireEvent.click(armCheckbox);
 
         const startBtn = screen.getByText("Start Job");
