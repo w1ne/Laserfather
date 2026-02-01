@@ -337,7 +337,7 @@ export function createVirtualGrblDriver(options: SimulatedOptions = {}): Virtual
   const responseDelayMs = options.responseDelayMs ?? 10;
 
   // Initial machine state
-  let state: VirtualState = {
+  const state: VirtualState = {
     status: options.initialState ?? "IDLE",
     mpos: { x: 0, y: 0, z: 0 },
     wpos: { x: 0, y: 0, z: 0 },

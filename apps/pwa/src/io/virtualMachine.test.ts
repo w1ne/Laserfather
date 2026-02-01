@@ -101,7 +101,7 @@ describe('Virtual Machine Integration', () => {
 
         // Pause
         await driver.pause();
-        let status = await driver.getStatus();
+        const status = await driver.getStatus();
         // Race condition: might pause before RUN or after
         // Ideally we wait for RUN then pause?
 
@@ -171,7 +171,7 @@ describe('Virtual Machine Integration', () => {
 
         // For now, let's verify WPos updates with G54 (Work Offsets) which IS visible
         await driver.sendLine('G0 X10 Y10');
-        let status = await driver.getStatus();
+        const status = await driver.getStatus();
         expect(status.mpos).toEqual({ x: 10, y: 10, z: 0 });
         expect(status.wpos).toEqual({ x: 10, y: 10, z: 0 });
 
