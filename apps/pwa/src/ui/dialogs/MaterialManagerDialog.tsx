@@ -25,8 +25,30 @@ export function MaterialManagerDialog({ isOpen, onClose }: MaterialManagerDialog
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2>Manage Materials</h2>
-                    <button className="close-button" onClick={onClose}>×</button>
+                    <h2>Material Library</h2>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                        <button
+                            className="button button--small"
+                            style={{ background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0" }}
+                            onClick={async () => {
+                                const name = prompt("New Material Name:", "My Material");
+                                if (!name) return;
+                                const newPreset = {
+                                    id: crypto.randomUUID(),
+                                    name,
+                                    mode: "line" as const,
+                                    speed: 1000,
+                                    power: 50,
+                                    passes: 1
+                                };
+                                await materialRepo.save(newPreset);
+                                dispatch({ type: "ADD_MATERIAL_PRESET", payload: newPreset });
+                            }}
+                        >
+                            + New
+                        </button>
+                        <button className="close-button" onClick={onClose}>×</button>
+                    </div>
                 </div>
                 <div className="modal-body" style={{ maxHeight: "400px", overflowY: "auto" }}>
                     {materialPresets.length === 0 ? (

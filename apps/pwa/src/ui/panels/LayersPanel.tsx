@@ -42,14 +42,16 @@ export function LayersPanel({
                     <button
                         className="button button--small"
                         onClick={onOpenMaterialManager}
+                        title="Open Material Library"
                     >
-                        Materials
+                        📚 Materials
                     </button>
                     <button
                         className="button button--small"
                         onClick={() => LayerService.addLayer(state, dispatch)}
+                        title="Create a new Operation Layer"
                     >
-                        + Add
+                        Add Layer
                     </button>
                 </div>
             </div>
@@ -218,7 +220,7 @@ export function LayersPanel({
                             className="button button--primary"
                             onClick={onGenerate}
                             disabled={!isWorkerReady || generationState.status === "working"}
-                            style={{ flex: 1.5 }}
+                            style={{ flex: 1 }}
                         >
                             {generationState.status === "working" ? "Wait..." : "Generate"}
                         </button>
